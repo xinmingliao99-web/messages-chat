@@ -1149,10 +1149,25 @@
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.detail || "Request failed");
-        hideTyping();
-        const reply = (data.reply || "").trim() || "hmm";
-        history.push({ role: "assistant", content: reply, images: [] });
-        appendMessage({ side: "in", text: reply });
+
+        const parts = Array.isArray(data.replies) && data.replies.length
+          ? data.replies.map((p) => String(p || "").trim()).filter(Boolean)
+          : [((data.reply || "").trim() || "hmm")];
+
+        const full = parts.join("\n\n");
+        history.push({ role: "assistant", content: full, images: [] });
+
+        for (let i = 0; i < parts.length; i += 1) {
+          if (i > 0) {
+            showTyping();
+            await new Promise((r) => setTimeout(r, 700 + Math.random() * 900));
+          }
+          hideTyping();
+          appendMessage({ side: "in", text: parts[i] });
+          if (i < parts.length - 1) {
+            await new Promise((r) => setTimeout(r, 250 + Math.random() * 350));
+          }
+        }
       } catch (err) {
         hideTyping();
         appendMessage({ side: "in", text: "Couldn't send — try again in a sec." });

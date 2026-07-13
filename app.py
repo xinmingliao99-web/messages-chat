@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Any, Literal
 
 import httpx
@@ -8,28 +9,41 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 AI_BUILDER_BASE = "https://space.ai-builders.com/backend/v1"
-DEFAULT_MODEL = os.getenv("CHAT_MODEL", "gpt-5")
+# gemini-2.5-pro: strong reasoning, reliable visible text on this platform.
+# (gpt-5 is available but often spends completion budget on hidden reasoning.)
+DEFAULT_MODEL = os.getenv("CHAT_MODEL", "gemini-2.5-pro")
 VISION_MODEL = os.getenv("VISION_MODEL", "kimi-k2.5")
+MSG_DELIMITER = "<<<MSG>>>"
+
+SPLIT_INSTRUCTION = f"""
+When the answer is substantive (theory, explanation, analysis, advice), break it into
+2–5 separate Slack DMs — the way a friend texts a long thought in bursts.
+Separate each DM with this exact delimiter on its own line:
+{MSG_DELIMITER}
+Each chunk should feel like its own message (1–4 sentences). Do not number them.
+For tiny small-talk replies, send a single message with no delimiter.
+"""
 
 STYLE_PROMPTS = {
-    "assistant": """You are a highly capable assistant chatting in Slack.
+    "assistant": f"""You are a highly capable assistant chatting in Slack.
 Rules:
-- Be clear, rigorous, and informative — aim for the depth of a strong graduate seminar answer when the topic warrants it.
+- Be clear, rigorous, and informative — aim for graduate-seminar depth when the topic warrants it.
 - Prefer short paragraphs; use dashes or bullet points when listing ideas, steps, or options.
-- You may use light markdown structure (bullets, short headings) when it helps readability.
 - For theory / academic questions: define the concept, give context, note key nuances or debates, and give a concrete example when useful.
 - Match the user's language (English/Chinese/etc.).
 - If given an image or file, analyze it carefully.
+{SPLIT_INSTRUCTION}
 """,
-    "friend": """You are chatting as a sharp, well-read friend/coworker in Slack — natural voice, real competence.
+    "friend": f"""You are chatting as a sharp, well-read friend/coworker in Slack — natural voice, real competence.
 Rules:
 - Sound like a person DMing, never like a chatbot. Do not say you are AI, a model, ChatGPT, Grok, Claude, or similar.
-- Match reply length to the question: small talk stays short; conceptual / academic / hard questions get a real, substantive answer (several short paragraphs is fine).
-- For theory questions (e.g. Said, exile, postcolonial critique): explain the idea carefully — core claim, how it works, why it matters, and at least one nuance or example — without turning into a textbook dump.
+- Match reply length to the question: small talk stays short; conceptual / academic / hard questions get a real, substantive answer.
+- For theory questions (e.g. Said, exile, postcolonial critique): explain carefully — core claim, how it works, why it matters, and at least one nuance or example.
 - Prefer plain prose over bullet lists, unless the user asks for a list. Occasional lowercase / contractions are fine.
 - No fake humility that withholds knowledge. Be casually confident and precise.
 - Match the user's language (English/Chinese/etc.).
 - If given an image or file, react thoughtfully as if you looked at it.
+{SPLIT_INSTRUCTION}
 """,
 }
 
@@ -51,6 +65,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+    replies: list[str] = Field(default_factory=list)
 
 
 def get_token() -> str:
@@ -58,6 +73,51 @@ def get_token() -> str:
     if not token:
         raise HTTPException(status_code=500, detail="AI_BUILDER_TOKEN is not configured")
     return token
+
+
+def normalize_content(reply: Any) -> str:
+    if isinstance(reply, list):
+        return "".join(
+            part.get("text", "") if isinstance(part, dict) else str(part) for part in reply
+        ).strip()
+    return (reply or "").strip() if isinstance(reply, str) else str(reply or "").strip()
+
+
+def split_into_messages(reply: str) -> list[str]:
+    """Turn one model reply into several Slack-style bursts."""
+    text = reply.strip()
+    if not text:
+        return ["hmm one sec"]
+
+    if MSG_DELIMITER in text:
+        parts = [p.strip() for p in text.split(MSG_DELIMITER) if p.strip()]
+        return parts[:6] or [text]
+
+    # Fallback: split long prose into paragraph bursts
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
+    if len(paragraphs) >= 2:
+        return paragraphs[:6]
+
+    # Fallback: split very long single blocks on sentence boundaries
+    if len(text) > 320:
+        sentences = re.split(r"(?<=[.!?])\s+", text)
+        chunks: list[str] = []
+        buf = ""
+        for sentence in sentences:
+            if not sentence:
+                continue
+            candidate = f"{buf} {sentence}".strip() if buf else sentence
+            if len(candidate) > 220 and buf:
+                chunks.append(buf)
+                buf = sentence
+            else:
+                buf = candidate
+        if buf:
+            chunks.append(buf)
+        if len(chunks) >= 2:
+            return chunks[:6]
+
+    return [text]
 
 
 def build_api_messages(req: ChatRequest) -> tuple[list[dict[str, Any]], bool]:
@@ -105,11 +165,11 @@ async def chat(req: ChatRequest) -> ChatResponse:
         "model": model,
         "messages": api_messages,
         "temperature": 1.0 if model in {"kimi-k2.5", "gpt-5"} else 0.7,
-        "max_tokens": 2000 if model == "gpt-5" else (1200 if req.style == "assistant" else 900),
+        "max_tokens": 2500,
     }
 
     try:
-        async with httpx.AsyncClient(timeout=90.0) as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             response = await client.post(
                 f"{AI_BUILDER_BASE}/chat/completions",
                 headers={
@@ -127,20 +187,15 @@ async def chat(req: ChatRequest) -> ChatResponse:
 
     data = response.json()
     try:
-        reply = data["choices"][0]["message"]["content"]
+        raw_reply = data["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError) as exc:
         raise HTTPException(status_code=502, detail="Unexpected AI Builder response") from exc
 
-    if isinstance(reply, list):
-        reply = "".join(
-            part.get("text", "") if isinstance(part, dict) else str(part) for part in reply
-        )
+    reply = normalize_content(raw_reply)
+    replies = split_into_messages(reply)
+    joined = "\n\n".join(replies)
 
-    reply = (reply or "").strip()
-    if not reply:
-        reply = "hmm one sec"
-
-    return ChatResponse(reply=reply)
+    return ChatResponse(reply=joined, replies=replies)
 
 
 @app.post("/api/extract-text")
@@ -160,7 +215,6 @@ async def extract_text(file: UploadFile = File(...)) -> dict[str, str]:
             text = raw.decode("latin-1", errors="replace")
         return {"name": name, "text": text[:12000]}
 
-    # Fallback: note that binary files aren't parsed deeply in this lightweight build
     return {
         "name": name,
         "text": f"[Attached file: {name}. I can see the filename but not fully parse this file type in this demo.]",
