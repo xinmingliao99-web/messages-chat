@@ -3,9 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
   <title>Messages</title>
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("messages-chat-contact");
+        var appearance = "auto";
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (parsed && (parsed.appearance === "light" || parsed.appearance === "dark" || parsed.appearance === "auto")) {
+            appearance = parsed.appearance;
+          }
+        }
+        var theme = appearance === "auto"
+          ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+          : appearance;
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
   <style>
-    :root {
+    :root, [data-theme="dark"] {
+      color-scheme: dark;
+      --page-bg: #0d0d0f;
       --window-bg: #1e1e1e;
       --sidebar-bg: rgba(40, 40, 42, 0.92);
       --chat-bg: #1c1c1e;
@@ -17,20 +40,69 @@
       --hover: rgba(255, 255, 255, 0.06);
       --selected: rgba(10, 132, 255, 0.28);
       --composer-border: rgba(255, 255, 255, 0.12);
+      --titlebar-top: #2c2c2e;
+      --titlebar-bottom: #252528;
+      --title-color: #ebebf5;
+      --window-border: rgba(255, 255, 255, 0.1);
+      --window-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(0, 0, 0, 0.4);
+      --search-bg: rgba(255, 255, 255, 0.08);
+      --composer-bg: rgba(28, 28, 30, 0.95);
+      --input-bg: rgba(255, 255, 255, 0.04);
+      --card-bg: #2c2c2e;
+      --modal-bg: #2c2c2e;
+      --modal-overlay: rgba(0, 0, 0, 0.45);
+      --note: #a1a1a6;
+      --note-strong: #f5f5f7;
+      --segment-bg: rgba(0, 0, 0, 0.28);
+      --segment-active: rgba(255, 255, 255, 0.12);
+      --plus-bg: transparent;
       --traffic-close: #ff5f57;
       --traffic-min: #febc2e;
       --traffic-max: #28c840;
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --page-bg: #e8e8ed;
+      --window-bg: #ffffff;
+      --sidebar-bg: rgba(246, 246, 246, 0.94);
+      --chat-bg: #ffffff;
+      --bubble-in: #e9e9eb;
+      --bubble-out: #0a84ff;
+      --text: #1d1d1f;
+      --text-secondary: #8e8e93;
+      --separator: rgba(0, 0, 0, 0.1);
+      --hover: rgba(0, 0, 0, 0.04);
+      --selected: rgba(0, 122, 255, 0.14);
+      --composer-border: rgba(0, 0, 0, 0.12);
+      --titlebar-top: #f6f6f6;
+      --titlebar-bottom: #ececec;
+      --title-color: #1d1d1f;
+      --window-border: rgba(0, 0, 0, 0.12);
+      --window-shadow: 0 24px 80px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+      --search-bg: rgba(0, 0, 0, 0.06);
+      --composer-bg: rgba(255, 255, 255, 0.96);
+      --input-bg: #ffffff;
+      --card-bg: #f2f2f7;
+      --modal-bg: #ffffff;
+      --modal-overlay: rgba(0, 0, 0, 0.28);
+      --note: #6e6e73;
+      --note-strong: #1d1d1f;
+      --segment-bg: rgba(0, 0, 0, 0.06);
+      --segment-active: #ffffff;
+      --plus-bg: transparent;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       height: 100%;
-      background: #0d0d0f;
+      background: var(--page-bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
         "Helvetica Neue", Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     .stage {
@@ -44,26 +116,24 @@
     .note {
       max-width: 920px;
       width: 100%;
-      color: #a1a1a6;
+      color: var(--note);
       font-size: 13px;
       line-height: 1.45;
       text-align: center;
     }
 
-    .note strong { color: #f5f5f7; font-weight: 600; }
+    .note strong { color: var(--note-strong); font-weight: 600; }
 
     .window {
       width: min(980px, 100%);
       height: min(640px, calc(100vh - 100px));
       background: var(--window-bg);
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--window-border);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.55),
-        0 0 0 0.5px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--window-shadow);
     }
 
     .titlebar {
@@ -73,7 +143,7 @@
       grid-template-columns: 78px 1fr 78px;
       align-items: center;
       padding: 0 14px;
-      background: linear-gradient(to bottom, #2c2c2e, #252528);
+      background: linear-gradient(to bottom, var(--titlebar-top), var(--titlebar-bottom));
       border-bottom: 1px solid var(--separator);
       -webkit-app-region: drag;
       user-select: none;
@@ -101,7 +171,7 @@
       font-size: 13px;
       font-weight: 600;
       letter-spacing: -0.01em;
-      color: #ebebf5;
+      color: var(--title-color);
     }
 
     .body {
@@ -130,7 +200,7 @@
       border-radius: 6px;
       border: 0;
       outline: none;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--search-bg);
       color: var(--text);
       padding: 0 10px 0 28px;
       font: inherit;
@@ -160,7 +230,7 @@
     .conv:hover { background: var(--hover); }
     .conv.active {
       background: var(--selected);
-      border-left-color: #0a84ff;
+      border-left-color: var(--bubble-out);
     }
 
     .conv-avatar {
@@ -226,7 +296,7 @@
       justify-content: space-between;
       padding: 0 18px;
       border-bottom: 1px solid var(--separator);
-      background: rgba(28, 28, 30, 0.85);
+      background: var(--composer-bg);
       backdrop-filter: blur(16px);
     }
 
@@ -334,7 +404,7 @@
     .attach-card {
       border-radius: 12px;
       overflow: hidden;
-      background: #2c2c2e;
+      background: var(--card-bg);
       border: 1px solid var(--separator);
       min-width: 180px;
     }
@@ -344,7 +414,7 @@
       width: 100%;
       max-height: 200px;
       object-fit: cover;
-      background: #111;
+      background: var(--page-bg);
     }
 
     .attach-card .file-row {
@@ -420,7 +490,7 @@
       display: flex;
       align-items: flex-end;
       gap: 8px;
-      background: rgba(28, 28, 30, 0.95);
+      background: var(--composer-bg);
     }
 
     .icon-btn {
@@ -428,8 +498,8 @@
       height: 28px;
       border-radius: 50%;
       border: 0;
-      background: transparent;
-      color: #0a84ff;
+      background: var(--plus-bg);
+      color: var(--bubble-out);
       font-size: 18px;
       line-height: 1;
       cursor: pointer;
@@ -451,7 +521,7 @@
       align-items: flex-end;
       padding: 5px 8px 5px 14px;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--input-bg);
     }
 
     #message {
@@ -498,7 +568,7 @@
       flex-wrap: wrap;
       gap: 8px;
       padding: 0 16px 8px;
-      background: rgba(28, 28, 30, 0.95);
+      background: var(--composer-bg);
     }
 
     .pending:empty { display: none; }
@@ -508,7 +578,7 @@
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--separator);
-      background: #2c2c2e;
+      background: var(--card-bg);
       max-width: 140px;
     }
 
@@ -549,7 +619,7 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.45);
+      background: var(--modal-overlay);
       display: none;
       place-items: center;
       z-index: 50;
@@ -560,11 +630,11 @@
 
     .modal {
       width: min(360px, 100%);
-      background: #2c2c2e;
+      background: var(--modal-bg);
       border: 1px solid var(--separator);
       border-radius: 14px;
       padding: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      box-shadow: var(--window-shadow);
     }
 
     .modal h2 {
@@ -616,7 +686,7 @@
       height: 34px;
       border-radius: 8px;
       border: 1px solid var(--separator);
-      background: rgba(0, 0, 0, 0.25);
+      background: var(--search-bg);
       color: var(--text);
       padding: 0 12px;
       font: inherit;
@@ -625,7 +695,7 @@
       margin-bottom: 16px;
     }
 
-    .modal input[type="text"]:focus { border-color: #0a84ff; }
+    .modal input[type="text"]:focus { border-color: var(--bubble-out); }
 
     .btn-row {
       display: flex;
@@ -653,16 +723,16 @@
     .btn.ghost:hover { background: var(--hover); color: var(--text); }
 
     .btn.primary {
-      background: #0a84ff;
+      background: var(--bubble-out);
       color: white;
     }
 
     .btn.secondary {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--segment-bg);
       color: var(--text);
     }
 
-    .btn.secondary:hover { background: rgba(255, 255, 255, 0.14); }
+    .btn.secondary:hover { background: var(--hover); }
 
     .style-field {
       margin-bottom: 16px;
@@ -681,8 +751,12 @@
       gap: 4px;
       padding: 3px;
       border-radius: 10px;
-      background: rgba(0, 0, 0, 0.28);
+      background: var(--segment-bg);
       border: 1px solid var(--separator);
+    }
+
+    .style-switch.three {
+      grid-template-columns: 1fr 1fr 1fr;
     }
 
     .style-switch button {
@@ -699,8 +773,9 @@
     }
 
     .style-switch button.active {
-      background: rgba(255, 255, 255, 0.12);
+      background: var(--segment-active);
       color: var(--text);
+      box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.12);
     }
 
     .style-hint {
@@ -826,6 +901,15 @@
       <label for="contactNameInput">Name</label>
       <input type="text" id="contactNameInput" maxlength="40" placeholder="Contact name" />
       <div class="style-field">
+        <span>Appearance</span>
+        <div class="style-switch three" role="group" aria-label="Appearance">
+          <button type="button" id="appearanceLight" data-appearance="light">Light</button>
+          <button type="button" id="appearanceDark" data-appearance="dark">Dark</button>
+          <button type="button" id="appearanceAuto" data-appearance="auto" class="active">Auto</button>
+        </div>
+        <p class="style-hint" id="appearanceHint">Matches your Mac: light by day, dark at night.</p>
+      </div>
+      <div class="style-field">
         <span>Message style</span>
         <div class="style-switch" role="group" aria-label="Message style">
           <button type="button" id="styleAssistant" data-style="assistant">AI style</button>
@@ -855,15 +939,22 @@
     const avatarInput = document.getElementById("avatarInput");
 
     const STORAGE_KEY = "messages-chat-contact";
-    const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, style: "friend" };
+    const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, style: "friend", appearance: "auto" };
     const STYLE_HINTS = {
       assistant: "Clearer answers — can use dashes and bullet points.",
       friend: "Casual texts — short, natural, no bullet lists."
+    };
+    const APPEARANCE_HINTS = {
+      light: "Always use bright daytime Messages look.",
+      dark: "Always use night Messages look.",
+      auto: "Matches your Mac: light by day, dark at night."
     };
 
     let contact = loadContact();
     let draftAvatar = contact.avatarDataUrl;
     let draftStyle = contact.style || "friend";
+    let draftAppearance = contact.appearance || "auto";
+    let mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     const pendingFiles = [];
     const history = [
@@ -878,20 +969,35 @@
         if (!raw) return { ...DEFAULT_CONTACT };
         const parsed = JSON.parse(raw);
         const style = parsed.style === "assistant" ? "assistant" : "friend";
+        const appearance = ["light", "dark", "auto"].includes(parsed.appearance)
+          ? parsed.appearance
+          : "auto";
         return {
           name: (parsed.name || DEFAULT_CONTACT.name).trim() || DEFAULT_CONTACT.name,
           avatarDataUrl: parsed.avatarDataUrl || null,
-          style
+          style,
+          appearance
         };
       } catch {
         return { ...DEFAULT_CONTACT };
       }
     }
 
+    function resolvedTheme(appearance) {
+      if (appearance === "light" || appearance === "dark") return appearance;
+      return mediaQuery.matches ? "dark" : "light";
+    }
+
+    function applyTheme() {
+      const theme = resolvedTheme(contact.appearance || "auto");
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+
     function saveContact(next) {
       contact = next;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(contact));
       applyContact();
+      applyTheme();
     }
 
     function setStyleButtons(style) {
@@ -899,6 +1005,14 @@
       document.getElementById("styleAssistant").classList.toggle("active", draftStyle === "assistant");
       document.getElementById("styleFriend").classList.toggle("active", draftStyle === "friend");
       document.getElementById("styleHint").textContent = STYLE_HINTS[draftStyle];
+    }
+
+    function setAppearanceButtons(appearance) {
+      draftAppearance = ["light", "dark", "auto"].includes(appearance) ? appearance : "auto";
+      document.getElementById("appearanceLight").classList.toggle("active", draftAppearance === "light");
+      document.getElementById("appearanceDark").classList.toggle("active", draftAppearance === "dark");
+      document.getElementById("appearanceAuto").classList.toggle("active", draftAppearance === "auto");
+      document.getElementById("appearanceHint").textContent = APPEARANCE_HINTS[draftAppearance];
     }
 
     function initialFor(name) {
@@ -930,6 +1044,7 @@
       contactNameInput.value = contact.name;
       draftAvatar = contact.avatarDataUrl;
       setStyleButtons(contact.style || "friend");
+      setAppearanceButtons(contact.appearance || "auto");
       paintAvatar(modalAvatar, contact.name, draftAvatar);
       contactModal.classList.add("open");
       contactNameInput.focus();
@@ -940,6 +1055,7 @@
       contactModal.classList.remove("open");
       draftAvatar = contact.avatarDataUrl;
       draftStyle = contact.style || "friend";
+      draftAppearance = contact.appearance || "auto";
     }
 
     document.getElementById("openContact").addEventListener("click", openContactModal);
@@ -960,6 +1076,9 @@
 
     document.getElementById("styleAssistant").addEventListener("click", () => setStyleButtons("assistant"));
     document.getElementById("styleFriend").addEventListener("click", () => setStyleButtons("friend"));
+    document.getElementById("appearanceLight").addEventListener("click", () => setAppearanceButtons("light"));
+    document.getElementById("appearanceDark").addEventListener("click", () => setAppearanceButtons("dark"));
+    document.getElementById("appearanceAuto").addEventListener("click", () => setAppearanceButtons("auto"));
 
     document.getElementById("changePhotoBtn").addEventListener("click", () => avatarInput.click());
     document.getElementById("clearPhotoBtn").addEventListener("click", () => {
@@ -985,11 +1104,23 @@
 
     document.getElementById("saveContactBtn").addEventListener("click", () => {
       const name = contactNameInput.value.trim() || DEFAULT_CONTACT.name;
-      saveContact({ name, avatarDataUrl: draftAvatar, style: draftStyle });
+      saveContact({
+        name,
+        avatarDataUrl: draftAvatar,
+        style: draftStyle,
+        appearance: draftAppearance
+      });
       closeContactModal();
     });
 
+    const onSchemeChange = () => {
+      if ((contact.appearance || "auto") === "auto") applyTheme();
+    };
+    if (mediaQuery.addEventListener) mediaQuery.addEventListener("change", onSchemeChange);
+    else mediaQuery.addListener(onSchemeChange);
+
     applyContact();
+    applyTheme();
 
     function formatBytes(n) {
       if (n < 1024) return n + " B";
