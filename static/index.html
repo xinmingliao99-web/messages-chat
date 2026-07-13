@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Messages</title>
+  <style>
+    :root {
+      --window-bg: #1e1e1e;
+      --sidebar-bg: rgba(40, 40, 42, 0.92);
+      --chat-bg: #1c1c1e;
+      --bubble-in: #3a3a3c;
+      --bubble-out: #0a84ff;
+      --text: #f5f5f7;
+      --text-secondary: #98989d;
+      --separator: rgba(255, 255, 255, 0.08);
+      --hover: rgba(255, 255, 255, 0.06);
+      --selected: rgba(10, 132, 255, 0.28);
+      --composer-border: rgba(255, 255, 255, 0.12);
+      --traffic-close: #ff5f57;
+      --traffic-min: #febc2e;
+      --traffic-max: #28c840;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #0d0d0f;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+        "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .stage {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 28px 20px 36px;
+      gap: 16px;
+    }
+
+    .note {
+      max-width: 920px;
+      width: 100%;
+      color: #a1a1a6;
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .note strong { color: #f5f5f7; font-weight: 600; }
+
+    .window {
+      width: min(980px, 100%);
+      height: min(640px, calc(100vh - 100px));
+      background: var(--window-bg);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.55),
+        0 0 0 0.5px rgba(0, 0, 0, 0.4);
+    }
+
+    .titlebar {
+      height: 52px;
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: 78px 1fr 78px;
+      align-items: center;
+      padding: 0 14px;
+      background: linear-gradient(to bottom, #2c2c2e, #252528);
+      border-bottom: 1px solid var(--separator);
+      -webkit-app-region: drag;
+      user-select: none;
+    }
+
+    .traffic {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .traffic span {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .traffic .close { background: var(--traffic-close); }
+    .traffic .min { background: var(--traffic-min); }
+    .traffic .max { background: var(--traffic-max); }
+
+    .title {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: #ebebf5;
+    }
+
+    .body {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    .sidebar {
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--separator);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      backdrop-filter: blur(24px);
+    }
+
+    .sidebar-search {
+      padding: 10px 12px 8px;
+    }
+
+    .sidebar-search input {
+      width: 100%;
+      height: 28px;
+      border-radius: 6px;
+      border: 0;
+      outline: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      padding: 0 10px 0 28px;
+      font: inherit;
+      font-size: 12px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2398989d' viewBox='0 0 16 16'%3E%3Cpath d='M11.7 10.3a5.5 5.5 0 1 0-1.4 1.4l3.5 3.5 1.4-1.4-3.5-3.5zM2.5 6.5a4 4 0 1 1 8 0 4 4 0 0 1-8 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 9px center;
+    }
+
+    .sidebar-search input::placeholder { color: var(--text-secondary); }
+
+    .conv-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .conv {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 10px;
+      padding: 10px 14px;
+      cursor: default;
+      border-left: 3px solid transparent;
+    }
+
+    .conv:hover { background: var(--hover); }
+    .conv.active {
+      background: var(--selected);
+      border-left-color: #0a84ff;
+    }
+
+    .conv-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(145deg, #5e5ce6, #bf5af2);
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .conv-avatar.green { background: linear-gradient(145deg, #30d158, #34c759); }
+    .conv-avatar.orange { background: linear-gradient(145deg, #ff9f0a, #ff6b00); }
+    .conv-avatar.has-photo { color: transparent; font-size: 0; }
+
+    .conv-meta { min-width: 0; }
+    .conv-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+    .conv-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .conv-time {
+      font-size: 11px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .conv-preview {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--chat-bg);
+    }
+
+    .chat-header {
+      height: 52px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--separator);
+      background: rgba(28, 28, 30, 0.85);
+      backdrop-filter: blur(16px);
+    }
+
+    .chat-person {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 4px 6px 4px 2px;
+      margin-left: -2px;
+    }
+
+    .chat-person:hover { background: var(--hover); }
+
+    .chat-person .name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .chat-person .status {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .header-actions button {
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: default;
+      font-size: 14px;
+    }
+
+    .header-actions button:hover { background: var(--hover); color: var(--text); }
+
+    .thread {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      scroll-behavior: smooth;
+    }
+
+    .day {
+      align-self: center;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 500;
+      margin: 6px 0 14px;
+    }
+
+    .row {
+      display: flex;
+      width: 100%;
+      animation: rise 0.22s ease-out;
+    }
+
+    .row.in { justify-content: flex-start; }
+    .row.out { justify-content: flex-end; }
+
+    .bubble {
+      max-width: 62%;
+      padding: 8px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .row.in .bubble {
+      background: var(--bubble-in);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .row.out .bubble {
+      background: var(--bubble-out);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .row.in.tail .bubble { border-bottom-left-radius: 16px; }
+    .row.out.tail .bubble { border-bottom-right-radius: 16px; }
+
+    .bubble.attachment {
+      padding: 6px;
+      background: transparent;
+      max-width: 280px;
+    }
+
+    .row.out .bubble.attachment { background: transparent; }
+
+    .attach-card {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #2c2c2e;
+      border: 1px solid var(--separator);
+      min-width: 180px;
+    }
+
+    .attach-card img {
+      display: block;
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      background: #111;
+    }
+
+    .attach-card .file-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+
+    .file-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: #0a84ff;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .file-icon.pdf { background: #ff453a; }
+    .file-icon.doc { background: #0a84ff; }
+
+    .file-name {
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .typing {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      min-width: 52px;
+      min-height: 30px;
+    }
+
+    .typing span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #8e8e93;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.15s; }
+    .typing span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+      30% { transform: translateY(-3px); opacity: 1; }
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .composer {
+      flex-shrink: 0;
+      padding: 10px 16px 14px;
+      border-top: 1px solid var(--separator);
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      background: rgba(28, 28, 30, 0.95);
+    }
+
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 0;
+      background: transparent;
+      color: #0a84ff;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-bottom: 4px;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-btn:hover { background: var(--hover); }
+    .icon-btn:disabled { opacity: 0.35; cursor: default; }
+
+    .input-wrap {
+      flex: 1;
+      border: 1px solid var(--composer-border);
+      border-radius: 18px;
+      min-height: 34px;
+      display: flex;
+      align-items: flex-end;
+      padding: 5px 8px 5px 14px;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    #message {
+      flex: 1;
+      resize: none;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.35;
+      max-height: 110px;
+      padding: 4px 0;
+    }
+
+    #message::placeholder { color: var(--text-secondary); }
+
+    #send {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 0;
+      background: var(--bubble-out);
+      color: white;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      opacity: 0.35;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+
+    #send.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #send svg { width: 12px; height: 12px; margin-left: 1px; }
+
+    .pending {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 16px 8px;
+      background: rgba(28, 28, 30, 0.95);
+    }
+
+    .pending:empty { display: none; }
+
+    .chip {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--separator);
+      background: #2c2c2e;
+      max-width: 140px;
+    }
+
+    .chip img {
+      display: block;
+      width: 140px;
+      height: 90px;
+      object-fit: cover;
+    }
+
+    .chip .file-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      min-width: 120px;
+    }
+
+    .chip .remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 0;
+      background: rgba(0, 0, 0, 0.65);
+      color: white;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    #fileInput, #avatarInput { display: none; }
+
+    .header-actions button { cursor: pointer; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: none;
+      place-items: center;
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open { display: grid; }
+
+    .modal {
+      width: min(360px, 100%);
+      background: #2c2c2e;
+      border: 1px solid var(--separator);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .modal-avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .modal-avatar-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(145deg, #5e5ce6, #bf5af2);
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .modal-avatar-preview.has-photo { color: transparent; font-size: 0; }
+
+    .modal-avatar-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .modal input[type="text"] {
+      width: 100%;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--separator);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      padding: 0 12px;
+      font: inherit;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .modal input[type="text"]:focus { border-color: #0a84ff; }
+
+    .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn {
+      height: 30px;
+      padding: 0 14px;
+      border-radius: 8px;
+      border: 0;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .btn.ghost:hover { background: var(--hover); color: var(--text); }
+
+    .btn.primary {
+      background: #0a84ff;
+      color: white;
+    }
+
+    .btn.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .btn.secondary:hover { background: rgba(255, 255, 255, 0.14); }
+
+    .style-field {
+      margin-bottom: 16px;
+    }
+
+    .style-field > span {
+      display: block;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .style-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 3px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid var(--separator);
+    }
+
+    .style-switch button {
+      appearance: none;
+      border: 0;
+      border-radius: 8px;
+      height: 32px;
+      background: transparent;
+      color: var(--text-secondary);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .style-switch button.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+    }
+
+    .style-hint {
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 720px) {
+      .body { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .window { height: min(720px, calc(100vh - 80px)); border-radius: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <p class="note">
+      <strong>Messages</strong> — click name/avatar or ⓘ to customize.
+      Use <strong>+</strong> to attach images or text files.
+    </p>
+
+    <div class="window" role="application" aria-label="Messages for Mac preview">
+      <div class="titlebar">
+        <div class="traffic" aria-hidden="true">
+          <span class="close"></span>
+          <span class="min"></span>
+          <span class="max"></span>
+        </div>
+        <div class="title">Messages</div>
+        <div></div>
+      </div>
+
+      <div class="body">
+        <aside class="sidebar">
+          <div class="sidebar-search">
+            <input type="search" placeholder="Search" readonly tabindex="-1" />
+          </div>
+          <div class="conv-list">
+            <div class="conv active">
+              <div class="conv-avatar" id="sidebarAvatar">A</div>
+              <div class="conv-meta">
+                <div class="conv-top">
+                  <div class="conv-name" id="sidebarName">Alex</div>
+                  <div class="conv-time">9:41 AM</div>
+                </div>
+                <div class="conv-preview">Need a quick take on something.</div>
+              </div>
+            </div>
+            <div class="conv">
+              <div class="conv-avatar green">S</div>
+              <div class="conv-meta">
+                <div class="conv-top">
+                  <div class="conv-name">Sam</div>
+                  <div class="conv-time">Yesterday</div>
+                </div>
+                <div class="conv-preview">See you at the cafe</div>
+              </div>
+            </div>
+            <div class="conv">
+              <div class="conv-avatar orange">J</div>
+              <div class="conv-meta">
+                <div class="conv-top">
+                  <div class="conv-name">Jordan</div>
+                  <div class="conv-time">Fri</div>
+                </div>
+                <div class="conv-preview">Thanks!</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="chat">
+          <header class="chat-header">
+            <div class="chat-person" id="openContact" title="Edit contact" role="button" tabindex="0">
+              <div class="conv-avatar" id="headerAvatar" style="width:32px;height:32px;font-size:13px">A</div>
+              <div>
+                <div class="name" id="headerName">Alex</div>
+                <div class="status">iMessage</div>
+              </div>
+            </div>
+            <div class="header-actions">
+              <button type="button" id="detailsBtn" title="Edit contact" aria-label="Edit contact">ⓘ</button>
+            </div>
+          </header>
+
+          <main class="thread" id="thread" aria-live="polite">
+            <div class="day">Today 9:41 AM</div>
+            <div class="row in"><div class="bubble">Hey — you free for a sec?</div></div>
+            <div class="row in tail"><div class="bubble">Need a quick take on something.</div></div>
+          </main>
+
+          <div class="pending" id="pending"></div>
+
+          <form class="composer" id="composer" autocomplete="off">
+            <button class="icon-btn" type="button" id="attachBtn" title="Attach" aria-label="Attach file">+</button>
+            <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.doc,.docx,.md,.csv" />
+            <div class="input-wrap">
+              <textarea id="message" rows="1" placeholder="iMessage"></textarea>
+              <button id="send" type="submit" aria-label="Send">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M3.2 21.6 22 12 3.2 2.4 3 10.2 15.4 12 3 13.8z"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+    <div class="modal">
+      <h2 id="contactModalTitle">Edit contact</h2>
+      <div class="modal-avatar-row">
+        <div class="modal-avatar-preview" id="modalAvatar">A</div>
+        <div class="modal-avatar-actions">
+          <button type="button" class="btn secondary" id="changePhotoBtn">Choose photo…</button>
+          <button type="button" class="btn ghost" id="clearPhotoBtn">Use initial</button>
+        </div>
+      </div>
+      <label for="contactNameInput">Name</label>
+      <input type="text" id="contactNameInput" maxlength="40" placeholder="Contact name" />
+      <div class="style-field">
+        <span>Message style</span>
+        <div class="style-switch" role="group" aria-label="Message style">
+          <button type="button" id="styleAssistant" data-style="assistant">AI style</button>
+          <button type="button" id="styleFriend" data-style="friend" class="active">Friend chat</button>
+        </div>
+        <p class="style-hint" id="styleHint">Casual texts — short, natural, no bullet lists.</p>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn ghost" id="cancelContactBtn">Cancel</button>
+        <button type="button" class="btn primary" id="saveContactBtn">Save</button>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="avatarInput" accept="image/*" />
+
+  <script>
+    const thread = document.getElementById("thread");
+    const form = document.getElementById("composer");
+    const input = document.getElementById("message");
+    const sendBtn = document.getElementById("send");
+    const attachBtn = document.getElementById("attachBtn");
+    const fileInput = document.getElementById("fileInput");
+    const pendingEl = document.getElementById("pending");
+    const contactModal = document.getElementById("contactModal");
+    const contactNameInput = document.getElementById("contactNameInput");
+    const modalAvatar = document.getElementById("modalAvatar");
+    const avatarInput = document.getElementById("avatarInput");
+
+    const STORAGE_KEY = "messages-chat-contact";
+    const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, style: "friend" };
+    const STYLE_HINTS = {
+      assistant: "Clearer answers — can use dashes and bullet points.",
+      friend: "Casual texts — short, natural, no bullet lists."
+    };
+
+    let contact = loadContact();
+    let draftAvatar = contact.avatarDataUrl;
+    let draftStyle = contact.style || "friend";
+
+    const pendingFiles = [];
+    const history = [
+      { role: "assistant", content: "Hey — you free for a sec?", images: [] },
+      { role: "assistant", content: "Need a quick take on something.", images: [] }
+    ];
+    let busy = false;
+
+    function loadContact() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { ...DEFAULT_CONTACT };
+        const parsed = JSON.parse(raw);
+        const style = parsed.style === "assistant" ? "assistant" : "friend";
+        return {
+          name: (parsed.name || DEFAULT_CONTACT.name).trim() || DEFAULT_CONTACT.name,
+          avatarDataUrl: parsed.avatarDataUrl || null,
+          style
+        };
+      } catch {
+        return { ...DEFAULT_CONTACT };
+      }
+    }
+
+    function saveContact(next) {
+      contact = next;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(contact));
+      applyContact();
+    }
+
+    function setStyleButtons(style) {
+      draftStyle = style === "assistant" ? "assistant" : "friend";
+      document.getElementById("styleAssistant").classList.toggle("active", draftStyle === "assistant");
+      document.getElementById("styleFriend").classList.toggle("active", draftStyle === "friend");
+      document.getElementById("styleHint").textContent = STYLE_HINTS[draftStyle];
+    }
+
+    function initialFor(name) {
+      const cleaned = (name || "?").trim();
+      return (cleaned[0] || "?").toUpperCase();
+    }
+
+    function paintAvatar(el, name, avatarDataUrl) {
+      if (avatarDataUrl) {
+        el.classList.add("has-photo");
+        el.style.backgroundImage = `url("${avatarDataUrl}")`;
+        el.textContent = "";
+      } else {
+        el.classList.remove("has-photo");
+        el.style.backgroundImage = "";
+        el.textContent = initialFor(name);
+      }
+    }
+
+    function applyContact() {
+      document.getElementById("sidebarName").textContent = contact.name;
+      document.getElementById("headerName").textContent = contact.name;
+      paintAvatar(document.getElementById("sidebarAvatar"), contact.name, contact.avatarDataUrl);
+      paintAvatar(document.getElementById("headerAvatar"), contact.name, contact.avatarDataUrl);
+      document.title = contact.name;
+    }
+
+    function openContactModal() {
+      contactNameInput.value = contact.name;
+      draftAvatar = contact.avatarDataUrl;
+      setStyleButtons(contact.style || "friend");
+      paintAvatar(modalAvatar, contact.name, draftAvatar);
+      contactModal.classList.add("open");
+      contactNameInput.focus();
+      contactNameInput.select();
+    }
+
+    function closeContactModal() {
+      contactModal.classList.remove("open");
+      draftAvatar = contact.avatarDataUrl;
+      draftStyle = contact.style || "friend";
+    }
+
+    document.getElementById("openContact").addEventListener("click", openContactModal);
+    document.getElementById("openContact").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openContactModal();
+      }
+    });
+    document.getElementById("detailsBtn").addEventListener("click", openContactModal);
+    document.getElementById("cancelContactBtn").addEventListener("click", closeContactModal);
+    contactModal.addEventListener("click", (e) => {
+      if (e.target === contactModal) closeContactModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && contactModal.classList.contains("open")) closeContactModal();
+    });
+
+    document.getElementById("styleAssistant").addEventListener("click", () => setStyleButtons("assistant"));
+    document.getElementById("styleFriend").addEventListener("click", () => setStyleButtons("friend"));
+
+    document.getElementById("changePhotoBtn").addEventListener("click", () => avatarInput.click());
+    document.getElementById("clearPhotoBtn").addEventListener("click", () => {
+      draftAvatar = null;
+      paintAvatar(modalAvatar, contactNameInput.value || contact.name, null);
+    });
+
+    contactNameInput.addEventListener("input", () => {
+      if (!draftAvatar) paintAvatar(modalAvatar, contactNameInput.value || "?", null);
+    });
+
+    avatarInput.addEventListener("change", () => {
+      const file = avatarInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        draftAvatar = reader.result;
+        paintAvatar(modalAvatar, contactNameInput.value || contact.name, draftAvatar);
+      };
+      reader.readAsDataURL(file);
+      avatarInput.value = "";
+    });
+
+    document.getElementById("saveContactBtn").addEventListener("click", () => {
+      const name = contactNameInput.value.trim() || DEFAULT_CONTACT.name;
+      saveContact({ name, avatarDataUrl: draftAvatar, style: draftStyle });
+      closeContactModal();
+    });
+
+    applyContact();
+
+    function formatBytes(n) {
+      if (n < 1024) return n + " B";
+      if (n < 1024 * 1024) return (n / 1024).toFixed(0) + " KB";
+      return (n / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function extLabel(name) {
+      const ext = (name.split(".").pop() || "FILE").toUpperCase();
+      return ext.slice(0, 4);
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function resizeInput() {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 110) + "px";
+      const canSend = (input.value.trim().length > 0 || pendingFiles.length > 0) && !busy;
+      sendBtn.classList.toggle("active", canSend);
+    }
+
+    function renderPending() {
+      pendingEl.innerHTML = "";
+      pendingFiles.forEach((item, index) => {
+        const chip = document.createElement("div");
+        chip.className = "chip";
+        if (item.kind === "image") {
+          chip.innerHTML = `<img src="${item.url}" alt="" /><button class="remove" type="button" data-i="${index}" aria-label="Remove">×</button>`;
+        } else {
+          const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "doc";
+          chip.innerHTML = `
+            <div class="file-row">
+              <div class="file-icon ${klass}">${extLabel(item.name)}</div>
+              <div>
+                <div class="file-name">${item.name}</div>
+                <div class="file-size">${formatBytes(item.size)}</div>
+              </div>
+            </div>
+            <button class="remove" type="button" data-i="${index}" aria-label="Remove">×</button>`;
+        }
+        pendingEl.appendChild(chip);
+      });
+      pendingEl.querySelectorAll(".remove").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.i);
+          const removed = pendingFiles.splice(i, 1)[0];
+          if (removed?.url) URL.revokeObjectURL(removed.url);
+          renderPending();
+          resizeInput();
+        });
+      });
+      resizeInput();
+    }
+
+    function appendBubble(text, side) {
+      const row = document.createElement("div");
+      row.className = `row ${side} tail`;
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+      row.appendChild(bubble);
+      thread.appendChild(row);
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    function appendAttachment(item, side) {
+      const row = document.createElement("div");
+      row.className = `row ${side} tail`;
+      const bubble = document.createElement("div");
+      bubble.className = "bubble attachment";
+
+      if (item.kind === "image") {
+        bubble.innerHTML = `<div class="attach-card"><img src="${item.url}" alt="${item.name}" /></div>`;
+      } else {
+        const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "doc";
+        bubble.innerHTML = `
+          <div class="attach-card">
+            <div class="file-row">
+              <div class="file-icon ${klass}">${extLabel(item.name)}</div>
+              <div>
+                <div class="file-name">${item.name}</div>
+                <div class="file-size">${formatBytes(item.size)}</div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      row.appendChild(bubble);
+      thread.appendChild(row);
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    function showTyping() {
+      const row = document.createElement("div");
+      row.className = "row in tail";
+      row.id = "typing-row";
+      row.innerHTML = `<div class="bubble typing" aria-label="Typing"><span></span><span></span><span></span></div>`;
+      thread.appendChild(row);
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    function hideTyping() {
+      document.getElementById("typing-row")?.remove();
+    }
+
+    async function prepareAttachments(attachments) {
+      const images = [];
+      const notes = [];
+      for (const item of attachments) {
+        if (item.kind === "image" && item.file) {
+          const dataUrl = await fileToDataUrl(item.file);
+          images.push(dataUrl);
+          item.url = dataUrl;
+        } else if (item.file) {
+          const formData = new FormData();
+          formData.append("file", item.file);
+          try {
+            const res = await fetch("/api/extract-text", { method: "POST", body: formData });
+            if (res.ok) {
+              const data = await res.json();
+              notes.push(`Attached file "${data.name}":\n${data.text}`);
+            } else {
+              notes.push(`Attached file "${item.name}" (could not read contents).`);
+            }
+          } catch {
+            notes.push(`Attached file "${item.name}" (could not read contents).`);
+          }
+        }
+      }
+      return { images, notes };
+    }
+
+    async function askModel(userText, images) {
+      showTyping();
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contact_name: contact.name,
+            style: contact.style || "friend",
+            messages: history
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.detail || "Request failed");
+        }
+        hideTyping();
+        const reply = (data.reply || "").trim() || "hmm";
+        history.push({ role: "assistant", content: reply, images: [] });
+        appendBubble(reply, "in");
+        const preview = document.querySelector(".conv.active .conv-preview");
+        if (preview) preview.textContent = reply;
+      } catch (err) {
+        hideTyping();
+        appendBubble("Couldn't send — try again in a sec.", "in");
+        console.error(err);
+      }
+    }
+
+    attachBtn.addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", () => {
+      const files = Array.from(fileInput.files || []);
+      files.forEach((file) => {
+        const isImage = file.type.startsWith("image/");
+        pendingFiles.push({
+          kind: isImage ? "image" : "file",
+          name: file.name,
+          size: file.size,
+          url: isImage ? URL.createObjectURL(file) : null,
+          file
+        });
+      });
+      fileInput.value = "";
+      renderPending();
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      const attachments = pendingFiles.splice(0, pendingFiles.length);
+      renderPending();
+      if ((!text && attachments.length === 0) || busy) return;
+
+      busy = true;
+      resizeInput();
+
+      const prepared = await prepareAttachments(attachments);
+      attachments.forEach((item) => appendAttachment(item, "out"));
+      if (text) appendBubble(text, "out");
+
+      let content = text;
+      if (prepared.notes.length) {
+        content = [text, ...prepared.notes].filter(Boolean).join("\n\n");
+      }
+
+      history.push({
+        role: "user",
+        content: content || (prepared.images.length ? "sent a photo" : ""),
+        images: prepared.images
+      });
+
+      input.value = "";
+      resizeInput();
+      await askModel();
+      busy = false;
+      resizeInput();
+      input.focus();
+    });
+
+    input.addEventListener("input", resizeInput);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    resizeInput();
+  </script>
+</body>
+</html>
