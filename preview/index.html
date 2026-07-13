@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
-  <title>Messages</title>
+  <title>Slack</title>
   <script>
     (function () {
       try {
@@ -28,69 +28,64 @@
   <style>
     :root, [data-theme="dark"] {
       color-scheme: dark;
-      --page-bg: #0d0d0f;
-      --window-bg: #1e1e1e;
-      --sidebar-bg: rgba(40, 40, 42, 0.92);
-      --chat-bg: #1c1c1e;
-      --bubble-in: #3a3a3c;
-      --bubble-out: #0a84ff;
-      --text: #f5f5f7;
-      --text-secondary: #98989d;
-      --separator: rgba(255, 255, 255, 0.08);
-      --hover: rgba(255, 255, 255, 0.06);
-      --selected: rgba(10, 132, 255, 0.28);
-      --composer-border: rgba(255, 255, 255, 0.12);
-      --titlebar-top: #2c2c2e;
-      --titlebar-bottom: #252528;
-      --title-color: #ebebf5;
-      --window-border: rgba(255, 255, 255, 0.1);
-      --window-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(0, 0, 0, 0.4);
+      --page-bg: #1a1d21;
+      --sidebar-bg: #19171d;
+      --sidebar-text: #d1d2d3;
+      --sidebar-muted: #ababad;
+      --sidebar-hover: rgba(255, 255, 255, 0.06);
+      --sidebar-active: #1164a3;
+      --workspace: #350d36;
+      --main-bg: #1a1d21;
+      --header-bg: #1a1d21;
+      --text: #d1d2d3;
+      --text-strong: #f8f8f8;
+      --text-secondary: #ababad;
+      --separator: rgba(255, 255, 255, 0.1);
+      --hover: rgba(255, 255, 255, 0.04);
+      --composer-border: #565856;
+      --composer-bg: #222529;
+      --input-bg: #222529;
+      --msg-hover: rgba(255, 255, 255, 0.03);
+      --link: #1d9bd1;
+      --accent: #007a5a;
+      --modal-bg: #1a1d21;
+      --modal-overlay: rgba(0, 0, 0, 0.55);
+      --card-bg: #222529;
       --search-bg: rgba(255, 255, 255, 0.08);
-      --composer-bg: rgba(28, 28, 30, 0.95);
-      --input-bg: rgba(255, 255, 255, 0.04);
-      --card-bg: #2c2c2e;
-      --modal-bg: #2c2c2e;
-      --modal-overlay: rgba(0, 0, 0, 0.45);
-      --note: #a1a1a6;
-      --note-strong: #f5f5f7;
-      --segment-bg: rgba(0, 0, 0, 0.28);
-      --segment-active: rgba(255, 255, 255, 0.12);
-      --plus-bg: transparent;
-      --traffic-close: #ff5f57;
-      --traffic-min: #febc2e;
-      --traffic-max: #28c840;
+      --segment-bg: rgba(255, 255, 255, 0.08);
+      --segment-active: #222529;
+      --you-label: #e01e5a;
     }
 
     [data-theme="light"] {
       color-scheme: light;
-      --page-bg: #e8e8ed;
-      --window-bg: #ffffff;
-      --sidebar-bg: rgba(246, 246, 246, 0.94);
-      --chat-bg: #ffffff;
-      --bubble-in: #e9e9eb;
-      --bubble-out: #0a84ff;
-      --text: #1d1d1f;
-      --text-secondary: #8e8e93;
-      --separator: rgba(0, 0, 0, 0.1);
-      --hover: rgba(0, 0, 0, 0.04);
-      --selected: rgba(0, 122, 255, 0.14);
-      --composer-border: rgba(0, 0, 0, 0.12);
-      --titlebar-top: #f6f6f6;
-      --titlebar-bottom: #ececec;
-      --title-color: #1d1d1f;
-      --window-border: rgba(0, 0, 0, 0.12);
-      --window-shadow: 0 24px 80px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
-      --search-bg: rgba(0, 0, 0, 0.06);
-      --composer-bg: rgba(255, 255, 255, 0.96);
+      --page-bg: #ffffff;
+      --sidebar-bg: #3f0e40;
+      --sidebar-text: #ffffff;
+      --sidebar-muted: rgba(255, 255, 255, 0.7);
+      --sidebar-hover: rgba(255, 255, 255, 0.1);
+      --sidebar-active: #1164a3;
+      --workspace: #350d36;
+      --main-bg: #ffffff;
+      --header-bg: #ffffff;
+      --text: #1d1c1d;
+      --text-strong: #1d1c1d;
+      --text-secondary: #616061;
+      --separator: rgba(29, 28, 29, 0.13);
+      --hover: rgba(29, 28, 29, 0.04);
+      --composer-border: #868686;
+      --composer-bg: #ffffff;
       --input-bg: #ffffff;
-      --card-bg: #f2f2f7;
+      --msg-hover: rgba(29, 28, 29, 0.04);
+      --link: #1264a3;
+      --accent: #007a5a;
       --modal-bg: #ffffff;
-      --modal-overlay: rgba(0, 0, 0, 0.28);
-      --note: #6e6e73;
-      --note-strong: #1d1d1f;
-      --segment-bg: rgba(0, 0, 0, 0.06);
+      --modal-overlay: rgba(0, 0, 0, 0.4);
+      --card-bg: #f8f8f8;
+      --search-bg: rgba(255, 255, 255, 0.15);
+      --segment-bg: #f2f2f2;
       --segment-active: #ffffff;
-      --plus-bg: transparent;
+      --you-label: #e01e5a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -99,243 +94,163 @@
       height: 100%;
       background: var(--page-bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
-        "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-family: "Slack-Lato", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
-      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    .stage {
-      min-height: 100%;
+    .app {
+      height: 100%;
       display: grid;
-      place-items: center;
-      padding: 28px 20px 36px;
-      gap: 16px;
-    }
-
-    .note {
-      max-width: 920px;
-      width: 100%;
-      color: var(--note);
-      font-size: 13px;
-      line-height: 1.45;
-      text-align: center;
-    }
-
-    .note strong { color: var(--note-strong); font-weight: 600; }
-
-    .window {
-      width: min(980px, 100%);
-      height: min(640px, calc(100vh - 100px));
-      background: var(--window-bg);
-      border-radius: 12px;
-      border: 1px solid var(--window-border);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: var(--window-shadow);
-    }
-
-    .titlebar {
-      height: 52px;
-      flex-shrink: 0;
-      display: grid;
-      grid-template-columns: 78px 1fr 78px;
-      align-items: center;
-      padding: 0 14px;
-      background: linear-gradient(to bottom, var(--titlebar-top), var(--titlebar-bottom));
-      border-bottom: 1px solid var(--separator);
-      -webkit-app-region: drag;
-      user-select: none;
-    }
-
-    .traffic {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .traffic span {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .traffic .close { background: var(--traffic-close); }
-    .traffic .min { background: var(--traffic-min); }
-    .traffic .max { background: var(--traffic-max); }
-
-    .title {
-      text-align: center;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      color: var(--title-color);
-    }
-
-    .body {
-      flex: 1;
+      grid-template-columns: 260px 1fr;
       min-height: 0;
-      display: grid;
-      grid-template-columns: 280px 1fr;
     }
 
     .sidebar {
       background: var(--sidebar-bg);
-      border-right: 1px solid var(--separator);
+      color: var(--sidebar-text);
       display: flex;
       flex-direction: column;
       min-width: 0;
-      backdrop-filter: blur(24px);
+      border-right: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    .workspace {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -0.02em;
     }
 
     .sidebar-search {
-      padding: 10px 12px 8px;
+      padding: 10px 12px 6px;
     }
 
     .sidebar-search input {
       width: 100%;
-      height: 28px;
-      border-radius: 6px;
+      height: 30px;
       border: 0;
+      border-radius: 6px;
       outline: none;
       background: var(--search-bg);
-      color: var(--text);
-      padding: 0 10px 0 28px;
+      color: inherit;
+      padding: 0 10px;
       font: inherit;
-      font-size: 12px;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2398989d' viewBox='0 0 16 16'%3E%3Cpath d='M11.7 10.3a5.5 5.5 0 1 0-1.4 1.4l3.5 3.5 1.4-1.4-3.5-3.5zM2.5 6.5a4 4 0 1 1 8 0 4 4 0 0 1-8 0z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: 9px center;
+      font-size: 13px;
     }
 
-    .sidebar-search input::placeholder { color: var(--text-secondary); }
+    .sidebar-search input::placeholder { color: var(--sidebar-muted); }
 
-    .conv-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 4px 0;
+    .section-label {
+      padding: 14px 16px 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sidebar-muted);
+      text-transform: none;
     }
+
+    .conv-list { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
 
     .conv {
-      display: grid;
-      grid-template-columns: 40px 1fr;
-      gap: 10px;
-      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
       cursor: default;
-      border-left: 3px solid transparent;
+      color: var(--sidebar-text);
+      font-size: 15px;
     }
 
-    .conv:hover { background: var(--hover); }
+    .conv:hover { background: var(--sidebar-hover); }
     .conv.active {
-      background: var(--selected);
-      border-left-color: var(--bubble-out);
+      background: var(--sidebar-active);
+      color: #fff;
     }
 
     .conv-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
       display: grid;
       place-items: center;
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       color: white;
-      background: linear-gradient(145deg, #5e5ce6, #bf5af2);
+      background: linear-gradient(145deg, #e01e5a, #ecb22e);
       background-size: cover;
       background-position: center;
       overflow: hidden;
       flex-shrink: 0;
     }
 
-    .conv-avatar.green { background: linear-gradient(145deg, #30d158, #34c759); }
-    .conv-avatar.orange { background: linear-gradient(145deg, #ff9f0a, #ff6b00); }
+    .conv-avatar.green { background: linear-gradient(145deg, #2eb67d, #007a5a); }
+    .conv-avatar.orange { background: linear-gradient(145deg, #ecb22e, #e01e5a); }
     .conv-avatar.has-photo { color: transparent; font-size: 0; }
 
-    .conv-meta { min-width: 0; }
-    .conv-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 2px;
-    }
     .conv-name {
-      font-size: 13px;
-      font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-    .conv-time {
-      font-size: 11px;
-      color: var(--text-secondary);
-      flex-shrink: 0;
-    }
-    .conv-preview {
-      font-size: 12px;
-      color: var(--text-secondary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-weight: 500;
     }
 
-    .chat {
+    .presence {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2eb67d;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .main {
       display: flex;
       flex-direction: column;
       min-width: 0;
-      background: var(--chat-bg);
+      background: var(--main-bg);
     }
 
     .chat-header {
-      height: 52px;
+      height: 49px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 18px;
+      padding: 0 16px;
       border-bottom: 1px solid var(--separator);
-      background: var(--composer-bg);
-      backdrop-filter: blur(16px);
+      background: var(--header-bg);
     }
 
     .chat-person {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       cursor: pointer;
-      border-radius: 8px;
-      padding: 4px 6px 4px 2px;
-      margin-left: -2px;
+      border-radius: 6px;
+      padding: 4px 6px;
+      margin-left: -6px;
     }
 
     .chat-person:hover { background: var(--hover); }
 
     .chat-person .name {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .chat-person .status {
-      font-size: 11px;
-      color: var(--text-secondary);
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 4px;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-strong);
+      letter-spacing: -0.02em;
     }
 
     .header-actions button {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border: 0;
       border-radius: 6px;
       background: transparent;
       color: var(--text-secondary);
-      cursor: default;
-      font-size: 14px;
+      cursor: pointer;
+      font-size: 15px;
     }
 
     .header-actions button:hover { background: var(--hover); color: var(--text); }
@@ -343,81 +258,101 @@
     .thread {
       flex: 1;
       overflow-y: auto;
-      padding: 20px 24px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      padding: 12px 0 8px;
       scroll-behavior: smooth;
     }
 
     .day {
-      align-self: center;
-      color: var(--text-secondary);
-      font-size: 11px;
-      font-weight: 500;
-      margin: 6px 0 14px;
-    }
-
-    .row {
       display: flex;
-      width: 100%;
-      animation: rise 0.22s ease-out;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 20px 12px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .row.in { justify-content: flex-start; }
-    .row.out { justify-content: flex-end; }
+    .day::before, .day::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--separator);
+    }
 
-    .bubble {
-      max-width: 62%;
-      padding: 8px 12px;
-      border-radius: 16px;
-      font-size: 13px;
-      line-height: 1.35;
-      letter-spacing: -0.01em;
-      word-wrap: break-word;
+    .msg {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 8px;
+      padding: 8px 20px;
+      animation: rise 0.18s ease-out;
+    }
+
+    .msg:hover { background: var(--msg-hover); }
+
+    .msg-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(145deg, #e01e5a, #ecb22e);
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .msg-avatar.you { background: linear-gradient(145deg, #36c5f0, #2eb67d); }
+    .msg-avatar.has-photo { color: transparent; font-size: 0; }
+
+    .msg-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .msg-author {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-strong);
+    }
+
+    .msg-author.you { color: var(--you-label); }
+
+    .msg-time {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .msg-body {
+      font-size: 15px;
+      line-height: 1.45;
       white-space: pre-wrap;
-    }
-
-    .row.in .bubble {
-      background: var(--bubble-in);
+      word-wrap: break-word;
       color: var(--text);
-      border-bottom-left-radius: 4px;
     }
-
-    .row.out .bubble {
-      background: var(--bubble-out);
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-
-    .row.in.tail .bubble { border-bottom-left-radius: 16px; }
-    .row.out.tail .bubble { border-bottom-right-radius: 16px; }
-
-    .bubble.attachment {
-      padding: 6px;
-      background: transparent;
-      max-width: 280px;
-    }
-
-    .row.out .bubble.attachment { background: transparent; }
 
     .attach-card {
-      border-radius: 12px;
+      margin-top: 8px;
+      border-radius: 8px;
       overflow: hidden;
       background: var(--card-bg);
       border: 1px solid var(--separator);
-      min-width: 180px;
+      max-width: 320px;
     }
 
     .attach-card img {
       display: block;
       width: 100%;
-      max-height: 200px;
+      max-height: 220px;
       object-fit: cover;
-      background: var(--page-bg);
     }
 
-    .attach-card .file-row {
+    .file-row {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -427,8 +362,8 @@
     .file-icon {
       width: 32px;
       height: 32px;
-      border-radius: 7px;
-      background: #0a84ff;
+      border-radius: 6px;
+      background: #1264a3;
       color: white;
       display: grid;
       place-items: center;
@@ -437,145 +372,58 @@
       flex-shrink: 0;
     }
 
-    .file-icon.pdf { background: #ff453a; }
-    .file-icon.doc { background: #0a84ff; }
+    .file-icon.pdf { background: #e01e5a; }
 
-    .file-name {
-      font-size: 12px;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .file-name { font-size: 13px; font-weight: 600; }
+    .file-size { font-size: 12px; color: var(--text-secondary); }
 
-    .file-size {
-      font-size: 11px;
+    .typing-row {
+      padding: 4px 20px 10px 68px;
+      font-size: 13px;
       color: var(--text-secondary);
+      min-height: 24px;
     }
 
-    .typing {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 10px 14px;
-      min-width: 52px;
-      min-height: 30px;
-    }
-
-    .typing span {
-      width: 6px;
-      height: 6px;
+    .typing-row .dots span {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      margin: 0 1px;
       border-radius: 50%;
-      background: #8e8e93;
+      background: var(--text-secondary);
       animation: bounce 1.2s infinite ease-in-out;
     }
 
-    .typing span:nth-child(2) { animation-delay: 0.15s; }
-    .typing span:nth-child(3) { animation-delay: 0.3s; }
+    .typing-row .dots span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-row .dots span:nth-child(3) { animation-delay: 0.3s; }
 
     @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
       30% { transform: translateY(-3px); opacity: 1; }
     }
 
     @keyframes rise {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .composer {
+    .composer-wrap {
       flex-shrink: 0;
-      padding: 10px 16px 14px;
-      border-top: 1px solid var(--separator);
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      background: var(--composer-bg);
+      padding: 0 20px 16px;
     }
-
-    .icon-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 0;
-      background: var(--plus-bg);
-      color: var(--bubble-out);
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      flex-shrink: 0;
-      margin-bottom: 4px;
-      display: grid;
-      place-items: center;
-    }
-
-    .icon-btn:hover { background: var(--hover); }
-    .icon-btn:disabled { opacity: 0.35; cursor: default; }
-
-    .input-wrap {
-      flex: 1;
-      border: 1px solid var(--composer-border);
-      border-radius: 18px;
-      min-height: 34px;
-      display: flex;
-      align-items: flex-end;
-      padding: 5px 8px 5px 14px;
-      gap: 6px;
-      background: var(--input-bg);
-    }
-
-    #message {
-      flex: 1;
-      resize: none;
-      border: 0;
-      outline: none;
-      background: transparent;
-      color: var(--text);
-      font: inherit;
-      font-size: 13px;
-      line-height: 1.35;
-      max-height: 110px;
-      padding: 4px 0;
-    }
-
-    #message::placeholder { color: var(--text-secondary); }
-
-    #send {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      border: 0;
-      background: var(--bubble-out);
-      color: white;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      opacity: 0.35;
-      pointer-events: none;
-      transition: opacity 0.15s ease;
-    }
-
-    #send.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    #send svg { width: 12px; height: 12px; margin-left: 1px; }
 
     .pending {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      padding: 0 16px 8px;
-      background: var(--composer-bg);
+      padding: 0 0 8px;
     }
 
     .pending:empty { display: none; }
 
     .chip {
       position: relative;
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
       border: 1px solid var(--separator);
       background: var(--card-bg);
@@ -589,13 +437,7 @@
       object-fit: cover;
     }
 
-    .chip .file-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      min-width: 120px;
-    }
+    .chip .file-row { padding: 8px 10px; min-width: 120px; }
 
     .chip .remove {
       position: absolute;
@@ -612,9 +454,78 @@
       cursor: pointer;
     }
 
-    #fileInput, #avatarInput { display: none; }
+    .composer {
+      border: 1px solid var(--composer-border);
+      border-radius: 8px;
+      background: var(--composer-bg);
+      padding: 8px 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-    .header-actions button { cursor: pointer; }
+    .composer:focus-within { border-color: var(--text-secondary); }
+
+    #message {
+      width: 100%;
+      resize: none;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      line-height: 1.4;
+      max-height: 140px;
+      min-height: 24px;
+      padding: 4px 2px;
+    }
+
+    #message::placeholder { color: var(--text-secondary); }
+
+    .composer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 0;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-btn:hover { background: var(--hover); color: var(--text); }
+
+    #send {
+      height: 28px;
+      padding: 0 12px;
+      border-radius: 4px;
+      border: 0;
+      background: var(--accent);
+      color: white;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    #send.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #fileInput, #avatarInput { display: none; }
 
     .modal-backdrop {
       position: fixed;
@@ -629,18 +540,19 @@
     .modal-backdrop.open { display: grid; }
 
     .modal {
-      width: min(360px, 100%);
+      width: min(400px, 100%);
       background: var(--modal-bg);
       border: 1px solid var(--separator);
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 20px;
-      box-shadow: var(--window-shadow);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
     }
 
     .modal h2 {
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 18px;
+      font-weight: 800;
       margin-bottom: 16px;
+      color: var(--text-strong);
     }
 
     .modal-avatar-row {
@@ -653,13 +565,13 @@
     .modal-avatar-preview {
       width: 64px;
       height: 64px;
-      border-radius: 50%;
+      border-radius: 8px;
       display: grid;
       place-items: center;
       font-size: 24px;
-      font-weight: 600;
+      font-weight: 700;
       color: white;
-      background: linear-gradient(145deg, #5e5ce6, #bf5af2);
+      background: linear-gradient(145deg, #e01e5a, #ecb22e);
       background-size: cover;
       background-position: center;
       overflow: hidden;
@@ -674,28 +586,69 @@
       gap: 8px;
     }
 
-    .modal label {
+    .modal label, .style-field > span {
       display: block;
-      font-size: 11px;
+      font-size: 12px;
+      font-weight: 700;
       color: var(--text-secondary);
       margin-bottom: 6px;
     }
 
     .modal input[type="text"] {
       width: 100%;
-      height: 34px;
-      border-radius: 8px;
+      height: 36px;
+      border-radius: 6px;
       border: 1px solid var(--separator);
       background: var(--search-bg);
       color: var(--text);
       padding: 0 12px;
       font: inherit;
-      font-size: 13px;
+      font-size: 14px;
       outline: none;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
-    .modal input[type="text"]:focus { border-color: var(--bubble-out); }
+    .modal input[type="text"]:focus { border-color: var(--link); }
+
+    .style-field { margin-bottom: 14px; }
+
+    .style-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 3px;
+      border-radius: 8px;
+      background: var(--segment-bg);
+      border: 1px solid var(--separator);
+    }
+
+    .style-switch.three { grid-template-columns: 1fr 1fr 1fr; }
+
+    .style-switch button {
+      appearance: none;
+      border: 0;
+      border-radius: 6px;
+      height: 32px;
+      background: transparent;
+      color: var(--text-secondary);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .style-switch button.active {
+      background: var(--segment-active);
+      color: var(--text-strong);
+      box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.12);
+    }
+
+    .style-hint {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--text-secondary);
+    }
 
     .btn-row {
       display: flex;
@@ -705,13 +658,13 @@
     }
 
     .btn {
-      height: 30px;
+      height: 32px;
       padding: 0 14px;
-      border-radius: 8px;
+      border-radius: 6px;
       border: 0;
       font: inherit;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 700;
       cursor: pointer;
     }
 
@@ -723,7 +676,7 @@
     .btn.ghost:hover { background: var(--hover); color: var(--text); }
 
     .btn.primary {
-      background: var(--bubble-out);
+      background: var(--accent);
       color: white;
     }
 
@@ -734,163 +687,70 @@
 
     .btn.secondary:hover { background: var(--hover); }
 
-    .style-field {
-      margin-bottom: 16px;
-    }
-
-    .style-field > span {
-      display: block;
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-    }
-
-    .style-switch {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px;
-      padding: 3px;
-      border-radius: 10px;
-      background: var(--segment-bg);
-      border: 1px solid var(--separator);
-    }
-
-    .style-switch.three {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-
-    .style-switch button {
-      appearance: none;
-      border: 0;
-      border-radius: 8px;
-      height: 32px;
-      background: transparent;
-      color: var(--text-secondary);
-      font: inherit;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .style-switch button.active {
-      background: var(--segment-active);
-      color: var(--text);
-      box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.12);
-    }
-
-    .style-hint {
-      margin-top: 8px;
-      font-size: 11px;
-      line-height: 1.4;
-      color: var(--text-secondary);
-    }
-
     @media (max-width: 720px) {
-      .body { grid-template-columns: 1fr; }
+      .app { grid-template-columns: 1fr; }
       .sidebar { display: none; }
-      .window { height: min(720px, calc(100vh - 80px)); border-radius: 10px; }
     }
   </style>
 </head>
 <body>
-  <div class="stage">
-    <p class="note">
-      <strong>Messages</strong> — click name/avatar or ⓘ to customize.
-      Use <strong>+</strong> to attach images or text files.
-    </p>
-
-    <div class="window" role="application" aria-label="Messages for Mac preview">
-      <div class="titlebar">
-        <div class="traffic" aria-hidden="true">
-          <span class="close"></span>
-          <span class="min"></span>
-          <span class="max"></span>
-        </div>
-        <div class="title">Messages</div>
-        <div></div>
+  <div class="app" role="application" aria-label="Slack">
+    <aside class="sidebar">
+      <div class="workspace">Workspace</div>
+      <div class="sidebar-search">
+        <input type="search" placeholder="Search" readonly tabindex="-1" />
       </div>
+      <div class="section-label">Direct messages</div>
+      <div class="conv-list">
+        <div class="conv active">
+          <div class="conv-avatar" id="sidebarAvatar">A</div>
+          <div class="conv-name" id="sidebarName">Alex</div>
+          <span class="presence" aria-hidden="true"></span>
+        </div>
+        <div class="conv">
+          <div class="conv-avatar green">S</div>
+          <div class="conv-name">Sam</div>
+        </div>
+        <div class="conv">
+          <div class="conv-avatar orange">J</div>
+          <div class="conv-name">Jordan</div>
+        </div>
+      </div>
+    </aside>
 
-      <div class="body">
-        <aside class="sidebar">
-          <div class="sidebar-search">
-            <input type="search" placeholder="Search" readonly tabindex="-1" />
-          </div>
-          <div class="conv-list">
-            <div class="conv active">
-              <div class="conv-avatar" id="sidebarAvatar">A</div>
-              <div class="conv-meta">
-                <div class="conv-top">
-                  <div class="conv-name" id="sidebarName">Alex</div>
-                  <div class="conv-time">9:41 AM</div>
-                </div>
-                <div class="conv-preview">Need a quick take on something.</div>
-              </div>
-            </div>
-            <div class="conv">
-              <div class="conv-avatar green">S</div>
-              <div class="conv-meta">
-                <div class="conv-top">
-                  <div class="conv-name">Sam</div>
-                  <div class="conv-time">Yesterday</div>
-                </div>
-                <div class="conv-preview">See you at the cafe</div>
-              </div>
-            </div>
-            <div class="conv">
-              <div class="conv-avatar orange">J</div>
-              <div class="conv-meta">
-                <div class="conv-top">
-                  <div class="conv-name">Jordan</div>
-                  <div class="conv-time">Fri</div>
-                </div>
-                <div class="conv-preview">Thanks!</div>
-              </div>
-            </div>
-          </div>
-        </aside>
+    <section class="main">
+      <header class="chat-header">
+        <div class="chat-person" id="openContact" title="Edit profile" role="button" tabindex="0">
+          <div class="name" id="headerName">Alex</div>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="detailsBtn" title="Edit profile" aria-label="Edit profile">ⓘ</button>
+        </div>
+      </header>
 
-        <section class="chat">
-          <header class="chat-header">
-            <div class="chat-person" id="openContact" title="Edit contact" role="button" tabindex="0">
-              <div class="conv-avatar" id="headerAvatar" style="width:32px;height:32px;font-size:13px">A</div>
-              <div>
-                <div class="name" id="headerName">Alex</div>
-                <div class="status">iMessage</div>
-              </div>
-            </div>
-            <div class="header-actions">
-              <button type="button" id="detailsBtn" title="Edit contact" aria-label="Edit contact">ⓘ</button>
-            </div>
-          </header>
+      <main class="thread" id="thread" aria-live="polite">
+        <div class="day">Today</div>
+      </main>
 
-          <main class="thread" id="thread" aria-live="polite">
-            <div class="day">Today 9:41 AM</div>
-            <div class="row in"><div class="bubble">Hey — you free for a sec?</div></div>
-            <div class="row in tail"><div class="bubble">Need a quick take on something.</div></div>
-          </main>
+      <div class="typing-row" id="typingRow" hidden></div>
 
-          <div class="pending" id="pending"></div>
-
-          <form class="composer" id="composer" autocomplete="off">
+      <div class="composer-wrap">
+        <div class="pending" id="pending"></div>
+        <form class="composer" id="composer" autocomplete="off">
+          <textarea id="message" rows="1" placeholder="Message Alex"></textarea>
+          <div class="composer-bar">
             <button class="icon-btn" type="button" id="attachBtn" title="Attach" aria-label="Attach file">+</button>
             <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.doc,.docx,.md,.csv" />
-            <div class="input-wrap">
-              <textarea id="message" rows="1" placeholder="iMessage"></textarea>
-              <button id="send" type="submit" aria-label="Send">
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M3.2 21.6 22 12 3.2 2.4 3 10.2 15.4 12 3 13.8z"/>
-                </svg>
-              </button>
-            </div>
-          </form>
-        </section>
+            <button id="send" type="submit">Send</button>
+          </div>
+        </form>
       </div>
-    </div>
+    </section>
   </div>
 
   <div class="modal-backdrop" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
     <div class="modal">
-      <h2 id="contactModalTitle">Edit contact</h2>
+      <h2 id="contactModalTitle">Edit profile</h2>
       <div class="modal-avatar-row">
         <div class="modal-avatar-preview" id="modalAvatar">A</div>
         <div class="modal-avatar-actions">
@@ -898,8 +758,8 @@
           <button type="button" class="btn ghost" id="clearPhotoBtn">Use initial</button>
         </div>
       </div>
-      <label for="contactNameInput">Name</label>
-      <input type="text" id="contactNameInput" maxlength="40" placeholder="Contact name" />
+      <label for="contactNameInput">Display name</label>
+      <input type="text" id="contactNameInput" maxlength="40" placeholder="Display name" />
       <div class="style-field">
         <span>Appearance</span>
         <div class="style-switch three" role="group" aria-label="Appearance">
@@ -907,7 +767,7 @@
           <button type="button" id="appearanceDark" data-appearance="dark">Dark</button>
           <button type="button" id="appearanceAuto" data-appearance="auto" class="active">Auto</button>
         </div>
-        <p class="style-hint" id="appearanceHint">Matches your Mac: light by day, dark at night.</p>
+        <p class="style-hint" id="appearanceHint">Matches your system: light by day, dark at night.</p>
       </div>
       <div class="style-field">
         <span>Message style</span>
@@ -937,6 +797,7 @@
     const contactNameInput = document.getElementById("contactNameInput");
     const modalAvatar = document.getElementById("modalAvatar");
     const avatarInput = document.getElementById("avatarInput");
+    const typingRow = document.getElementById("typingRow");
 
     const STORAGE_KEY = "messages-chat-contact";
     const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, style: "friend", appearance: "auto" };
@@ -945,9 +806,9 @@
       friend: "Casual texts — short, natural, no bullet lists."
     };
     const APPEARANCE_HINTS = {
-      light: "Always use bright daytime Messages look.",
-      dark: "Always use night Messages look.",
-      auto: "Matches your Mac: light by day, dark at night."
+      light: "Always use bright Slack look.",
+      dark: "Always use dark Slack look.",
+      auto: "Matches your system: light by day, dark at night."
     };
 
     let contact = loadContact();
@@ -989,8 +850,7 @@
     }
 
     function applyTheme() {
-      const theme = resolvedTheme(contact.appearance || "auto");
-      document.documentElement.setAttribute("data-theme", theme);
+      document.documentElement.setAttribute("data-theme", resolvedTheme(contact.appearance || "auto"));
     }
 
     function saveContact(next) {
@@ -1016,8 +876,7 @@
     }
 
     function initialFor(name) {
-      const cleaned = (name || "?").trim();
-      return (cleaned[0] || "?").toUpperCase();
+      return ((name || "?").trim()[0] || "?").toUpperCase();
     }
 
     function paintAvatar(el, name, avatarDataUrl) {
@@ -1032,12 +891,23 @@
       }
     }
 
+    function formatTime(date = new Date()) {
+      return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    }
+
     function applyContact() {
       document.getElementById("sidebarName").textContent = contact.name;
       document.getElementById("headerName").textContent = contact.name;
       paintAvatar(document.getElementById("sidebarAvatar"), contact.name, contact.avatarDataUrl);
-      paintAvatar(document.getElementById("headerAvatar"), contact.name, contact.avatarDataUrl);
+      paintAvatar(modalAvatar, contact.name, contact.avatarDataUrl);
       document.title = contact.name;
+      input.placeholder = `Message ${contact.name}`;
+      document.querySelectorAll(".msg.them .msg-author").forEach((el) => {
+        el.textContent = contact.name;
+      });
+      document.querySelectorAll(".msg.them .msg-avatar").forEach((el) => {
+        paintAvatar(el, contact.name, contact.avatarDataUrl);
+      });
     }
 
     function openContactModal() {
@@ -1119,9 +989,6 @@
     if (mediaQuery.addEventListener) mediaQuery.addEventListener("change", onSchemeChange);
     else mediaQuery.addListener(onSchemeChange);
 
-    applyContact();
-    applyTheme();
-
     function formatBytes(n) {
       if (n < 1024) return n + " B";
       if (n < 1024 * 1024) return (n / 1024).toFixed(0) + " KB";
@@ -1129,8 +996,7 @@
     }
 
     function extLabel(name) {
-      const ext = (name.split(".").pop() || "FILE").toUpperCase();
-      return ext.slice(0, 4);
+      return ((name.split(".").pop() || "FILE").toUpperCase()).slice(0, 4);
     }
 
     function fileToDataUrl(file) {
@@ -1144,7 +1010,7 @@
 
     function resizeInput() {
       input.style.height = "auto";
-      input.style.height = Math.min(input.scrollHeight, 110) + "px";
+      input.style.height = Math.min(input.scrollHeight, 140) + "px";
       const canSend = (input.value.trim().length > 0 || pendingFiles.length > 0) && !busy;
       sendBtn.classList.toggle("active", canSend);
     }
@@ -1157,7 +1023,7 @@
         if (item.kind === "image") {
           chip.innerHTML = `<img src="${item.url}" alt="" /><button class="remove" type="button" data-i="${index}" aria-label="Remove">×</button>`;
         } else {
-          const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "doc";
+          const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "";
           chip.innerHTML = `
             <div class="file-row">
               <div class="file-icon ${klass}">${extLabel(item.name)}</div>
@@ -1182,55 +1048,64 @@
       resizeInput();
     }
 
-    function appendBubble(text, side) {
+    function appendMessage({ side, text, attachments = [] }) {
       const row = document.createElement("div");
-      row.className = `row ${side} tail`;
-      const bubble = document.createElement("div");
-      bubble.className = "bubble";
-      bubble.textContent = text;
-      row.appendChild(bubble);
-      thread.appendChild(row);
-      thread.scrollTop = thread.scrollHeight;
-    }
+      row.className = `msg ${side === "out" ? "you" : "them"}`;
 
-    function appendAttachment(item, side) {
-      const row = document.createElement("div");
-      row.className = `row ${side} tail`;
-      const bubble = document.createElement("div");
-      bubble.className = "bubble attachment";
-
-      if (item.kind === "image") {
-        bubble.innerHTML = `<div class="attach-card"><img src="${item.url}" alt="${item.name}" /></div>`;
+      const avatar = document.createElement("div");
+      avatar.className = `msg-avatar ${side === "out" ? "you" : ""}`;
+      if (side === "out") {
+        avatar.textContent = "Y";
       } else {
-        const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "doc";
-        bubble.innerHTML = `
-          <div class="attach-card">
+        paintAvatar(avatar, contact.name, contact.avatarDataUrl);
+      }
+
+      const content = document.createElement("div");
+      const meta = document.createElement("div");
+      meta.className = "msg-meta";
+      meta.innerHTML = `
+        <span class="msg-author ${side === "out" ? "you" : ""}">${side === "out" ? "You" : contact.name}</span>
+        <span class="msg-time">${formatTime()}</span>`;
+
+      const body = document.createElement("div");
+      body.className = "msg-body";
+      if (text) body.textContent = text;
+
+      attachments.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "attach-card";
+        if (item.kind === "image") {
+          card.innerHTML = `<img src="${item.url}" alt="${item.name}" />`;
+        } else {
+          const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "";
+          card.innerHTML = `
             <div class="file-row">
               <div class="file-icon ${klass}">${extLabel(item.name)}</div>
               <div>
                 <div class="file-name">${item.name}</div>
                 <div class="file-size">${formatBytes(item.size)}</div>
               </div>
-            </div>
-          </div>`;
-      }
+            </div>`;
+        }
+        body.appendChild(card);
+      });
 
-      row.appendChild(bubble);
+      content.appendChild(meta);
+      content.appendChild(body);
+      row.appendChild(avatar);
+      row.appendChild(content);
       thread.appendChild(row);
       thread.scrollTop = thread.scrollHeight;
     }
 
     function showTyping() {
-      const row = document.createElement("div");
-      row.className = "row in tail";
-      row.id = "typing-row";
-      row.innerHTML = `<div class="bubble typing" aria-label="Typing"><span></span><span></span><span></span></div>`;
-      thread.appendChild(row);
-      thread.scrollTop = thread.scrollHeight;
+      typingRow.hidden = false;
+      typingRow.innerHTML = `${contact.name} is typing <span class="dots"><span></span><span></span><span></span></span>`;
     }
 
     function hideTyping() {
-      document.getElementById("typing-row")?.remove();
+      typingRow.hidden = true;
+      typingRow.textContent = "";
     }
 
     async function prepareAttachments(attachments) {
@@ -1260,7 +1135,7 @@
       return { images, notes };
     }
 
-    async function askModel(userText, images) {
+    async function askModel() {
       showTyping();
       try {
         const res = await fetch("/api/chat", {
@@ -1273,18 +1148,14 @@
           })
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(data.detail || "Request failed");
-        }
+        if (!res.ok) throw new Error(data.detail || "Request failed");
         hideTyping();
         const reply = (data.reply || "").trim() || "hmm";
         history.push({ role: "assistant", content: reply, images: [] });
-        appendBubble(reply, "in");
-        const preview = document.querySelector(".conv.active .conv-preview");
-        if (preview) preview.textContent = reply;
+        appendMessage({ side: "in", text: reply });
       } catch (err) {
         hideTyping();
-        appendBubble("Couldn't send — try again in a sec.", "in");
+        appendMessage({ side: "in", text: "Couldn't send — try again in a sec." });
         console.error(err);
       }
     }
@@ -1292,8 +1163,7 @@
     attachBtn.addEventListener("click", () => fileInput.click());
 
     fileInput.addEventListener("change", () => {
-      const files = Array.from(fileInput.files || []);
-      files.forEach((file) => {
+      Array.from(fileInput.files || []).forEach((file) => {
         const isImage = file.type.startsWith("image/");
         pendingFiles.push({
           kind: isImage ? "image" : "file",
@@ -1318,8 +1188,7 @@
       resizeInput();
 
       const prepared = await prepareAttachments(attachments);
-      attachments.forEach((item) => appendAttachment(item, "out"));
-      if (text) appendBubble(text, "out");
+      appendMessage({ side: "out", text, attachments });
 
       let content = text;
       if (prepared.notes.length) {
@@ -1348,6 +1217,12 @@
       }
     });
 
+    // Seed opening messages in Slack layout
+    appendMessage({ side: "in", text: "Hey — you free for a sec?" });
+    appendMessage({ side: "in", text: "Need a quick take on something." });
+
+    applyContact();
+    applyTheme();
     resizeInput();
   </script>
 </body>
