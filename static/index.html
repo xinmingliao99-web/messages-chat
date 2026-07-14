@@ -10,18 +10,24 @@
       try {
         var raw = localStorage.getItem("messages-chat-contact");
         var appearance = "auto";
+        var skin = "slack";
         if (raw) {
           var parsed = JSON.parse(raw);
           if (parsed && (parsed.appearance === "light" || parsed.appearance === "dark" || parsed.appearance === "auto")) {
             appearance = parsed.appearance;
+          }
+          if (parsed && (parsed.skin === "slack" || parsed.skin === "whatsapp")) {
+            skin = parsed.skin;
           }
         }
         var theme = appearance === "auto"
           ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
           : appearance;
         document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.setAttribute("data-skin", skin);
       } catch (e) {
         document.documentElement.setAttribute("data-theme", "dark");
+        document.documentElement.setAttribute("data-skin", "slack");
       }
     })();
   </script>
@@ -121,6 +127,24 @@
       font-weight: 700;
       font-size: 17px;
       letter-spacing: -0.02em;
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .workspace:hover { background: var(--sidebar-hover); }
+
+    .workspace small {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--sidebar-muted);
     }
 
     .sidebar-search {
@@ -687,20 +711,310 @@
 
     .btn.secondary:hover { background: var(--hover); }
 
+    /* ——— WhatsApp skin ——— */
+    [data-skin="whatsapp"][data-theme="light"] {
+      --page-bg: #f0f2f5;
+      --sidebar-bg: #ffffff;
+      --sidebar-text: #111b21;
+      --sidebar-muted: #667781;
+      --sidebar-hover: #f5f6f6;
+      --sidebar-active: #f0f2f5;
+      --main-bg: #efeae2;
+      --header-bg: #008069;
+      --text: #111b21;
+      --text-strong: #111b21;
+      --text-secondary: #667781;
+      --separator: #d1d7db;
+      --hover: rgba(11, 20, 26, 0.05);
+      --composer-border: transparent;
+      --composer-bg: #f0f2f5;
+      --input-bg: #ffffff;
+      --msg-hover: transparent;
+      --accent: #00a884;
+      --modal-bg: #ffffff;
+      --card-bg: #ffffff;
+      --search-bg: #f0f2f5;
+      --segment-bg: #f0f2f5;
+      --segment-active: #ffffff;
+      --wa-out: #d9fdd3;
+      --wa-in: #ffffff;
+      --wa-header-text: #ffffff;
+    }
+
+    [data-skin="whatsapp"][data-theme="dark"] {
+      --page-bg: #0b141a;
+      --sidebar-bg: #111b21;
+      --sidebar-text: #e9edef;
+      --sidebar-muted: #8696a0;
+      --sidebar-hover: #202c33;
+      --sidebar-active: #2a3942;
+      --main-bg: #0b141a;
+      --header-bg: #202c33;
+      --text: #e9edef;
+      --text-strong: #e9edef;
+      --text-secondary: #8696a0;
+      --separator: #222d34;
+      --hover: rgba(255, 255, 255, 0.04);
+      --composer-border: transparent;
+      --composer-bg: #202c33;
+      --input-bg: #2a3942;
+      --msg-hover: transparent;
+      --accent: #00a884;
+      --modal-bg: #111b21;
+      --card-bg: #202c33;
+      --search-bg: #202c33;
+      --segment-bg: #202c33;
+      --segment-active: #2a3942;
+      --wa-out: #005c4b;
+      --wa-in: #202c33;
+      --wa-header-text: #e9edef;
+    }
+
+    [data-skin="whatsapp"] body {
+      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    [data-skin="whatsapp"] .sidebar {
+      border-right: 1px solid var(--separator);
+    }
+
+    [data-skin="whatsapp"] .workspace {
+      background: var(--header-bg);
+      color: var(--wa-header-text);
+      border-bottom: 0;
+    }
+
+    [data-skin="whatsapp"] .workspace:hover {
+      filter: brightness(1.05);
+      background: var(--header-bg);
+    }
+
+    [data-skin="whatsapp"] .workspace small {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    [data-skin="whatsapp"] .sidebar-search {
+      background: var(--sidebar-bg);
+      padding: 8px 12px 10px;
+    }
+
+    [data-skin="whatsapp"] .sidebar-search input {
+      border-radius: 8px;
+      height: 36px;
+      background: var(--search-bg);
+      color: var(--sidebar-text);
+    }
+
+    [data-skin="whatsapp"] .section-label {
+      color: var(--sidebar-muted);
+      background: var(--sidebar-bg);
+    }
+
+    [data-skin="whatsapp"] .conv {
+      border-radius: 0;
+      padding: 10px 14px;
+      gap: 12px;
+      border-bottom: 1px solid var(--separator);
+      color: var(--sidebar-text);
+    }
+
+    [data-skin="whatsapp"] .conv.active {
+      background: var(--sidebar-active);
+      color: var(--sidebar-text);
+    }
+
+    [data-skin="whatsapp"] .conv-avatar,
+    [data-skin="whatsapp"] .msg-avatar,
+    [data-skin="whatsapp"] .modal-avatar-preview {
+      border-radius: 50%;
+    }
+
+    [data-skin="whatsapp"] .presence { display: none; }
+
+    [data-skin="whatsapp"] .chat-header {
+      background: var(--header-bg);
+      border-bottom: 0;
+      height: 56px;
+    }
+
+    [data-skin="whatsapp"] .chat-person .name,
+    [data-skin="whatsapp"] .header-actions button {
+      color: var(--wa-header-text);
+    }
+
+    [data-skin="whatsapp"] .header-actions button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--wa-header-text);
+    }
+
+    [data-skin="whatsapp"] .thread {
+      background:
+        linear-gradient(rgba(11, 20, 26, 0.04), rgba(11, 20, 26, 0.04)),
+        var(--main-bg);
+      padding: 12px 16px 8px;
+    }
+
+    [data-skin="whatsapp"][data-theme="dark"] .thread {
+      background: var(--main-bg);
+    }
+
+    [data-skin="whatsapp"] .day {
+      margin: 10px auto 14px;
+      background: var(--card-bg);
+      color: var(--text-secondary);
+      padding: 5px 12px;
+      border-radius: 8px;
+      width: fit-content;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
+    }
+
+    [data-skin="whatsapp"] .day::before,
+    [data-skin="whatsapp"] .day::after { display: none; }
+
+    [data-skin="whatsapp"] .msg {
+      display: flex;
+      grid-template-columns: none;
+      gap: 0;
+      padding: 2px 0;
+      justify-content: flex-start;
+    }
+
+    [data-skin="whatsapp"] .msg.you { justify-content: flex-end; }
+
+    [data-skin="whatsapp"] .msg:hover { background: transparent; }
+
+    [data-skin="whatsapp"] .msg-avatar { display: none; }
+
+    [data-skin="whatsapp"] .msg-content {
+      max-width: min(78%, 520px);
+      background: var(--wa-in);
+      border-radius: 8px;
+      padding: 6px 8px 4px;
+      box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
+      position: relative;
+    }
+
+    [data-skin="whatsapp"] .msg.you .msg-content {
+      background: var(--wa-out);
+      border-top-right-radius: 0;
+    }
+
+    [data-skin="whatsapp"] .msg.them .msg-content {
+      border-top-left-radius: 0;
+    }
+
+    [data-skin="whatsapp"] .msg-meta {
+      display: none;
+    }
+
+    [data-skin="whatsapp"] .msg-body {
+      font-size: 14.2px;
+      line-height: 1.4;
+      position: relative;
+      padding-right: 52px;
+      padding-bottom: 4px;
+      color: var(--text);
+    }
+
+    [data-skin="whatsapp"] .msg-body::after {
+      content: attr(data-time);
+      position: absolute;
+      right: 4px;
+      bottom: 0;
+      font-size: 11px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    [data-skin="whatsapp"] .typing-row {
+      padding: 4px 8px 8px;
+      color: var(--text-secondary);
+    }
+
+    [data-skin="whatsapp"] .composer-wrap {
+      background: var(--composer-bg);
+      padding: 8px 10px 10px;
+    }
+
+    [data-skin="whatsapp"] .composer {
+      border: 0;
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    [data-skin="whatsapp"] .composer:focus-within { border-color: transparent; }
+
+    [data-skin="whatsapp"] #message {
+      background: var(--input-bg);
+      border-radius: 24px;
+      padding: 10px 14px;
+      font-size: 15px;
+      min-height: 42px;
+    }
+
+    [data-skin="whatsapp"] .composer-bar {
+      display: contents;
+    }
+
+    [data-skin="whatsapp"] .icon-btn {
+      order: -1;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: var(--text-secondary);
+      font-size: 22px;
+    }
+
+    [data-skin="whatsapp"] #send {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      padding: 0;
+      background: var(--accent);
+      font-size: 0;
+      position: relative;
+    }
+
+    [data-skin="whatsapp"] #send::before {
+      content: "➤";
+      font-size: 16px;
+      color: white;
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    [data-skin="whatsapp"] .btn.primary {
+      background: var(--accent);
+    }
+
     @media (max-width: 720px) {
       .app { grid-template-columns: 1fr; }
       .sidebar { display: none; }
+      [data-skin="whatsapp"] .app.show-chats {
+        grid-template-columns: 1fr;
+      }
+      [data-skin="whatsapp"] .app.show-chats .sidebar { display: flex; }
+      [data-skin="whatsapp"] .app.show-chats .main { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="app" role="application" aria-label="Slack">
+  <div class="app" role="application" aria-label="Chat" id="appShell">
     <aside class="sidebar">
-      <div class="workspace">Workspace</div>
+      <button type="button" class="workspace" id="skinToggle" title="Switch app look">
+        Workspace
+        <small id="skinHint">Click to switch to WhatsApp</small>
+      </button>
       <div class="sidebar-search">
         <input type="search" placeholder="Search" readonly tabindex="-1" />
       </div>
-      <div class="section-label">Direct messages</div>
+      <div class="section-label" id="sectionLabel">Direct messages</div>
       <div class="conv-list">
         <div class="conv active">
           <div class="conv-avatar" id="sidebarAvatar">A</div>
@@ -724,6 +1038,7 @@
           <div class="name" id="headerName">Alex</div>
         </div>
         <div class="header-actions">
+          <button type="button" id="skinToggleHeader" title="Switch app look" aria-label="Switch app look">⇄</button>
           <button type="button" id="detailsBtn" title="Edit profile" aria-label="Edit profile">ⓘ</button>
         </div>
       </header>
@@ -792,10 +1107,10 @@
     const typingRow = document.getElementById("typingRow");
 
     const STORAGE_KEY = "messages-chat-contact";
-    const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, appearance: "auto" };
+    const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, appearance: "auto", skin: "slack" };
     const APPEARANCE_HINTS = {
-      light: "Always use bright Slack look.",
-      dark: "Always use dark Slack look.",
+      light: "Always use light mode.",
+      dark: "Always use dark mode.",
       auto: "Matches your system: light by day, dark at night."
     };
 
@@ -819,10 +1134,12 @@
         const appearance = ["light", "dark", "auto"].includes(parsed.appearance)
           ? parsed.appearance
           : "auto";
+        const skin = parsed.skin === "whatsapp" ? "whatsapp" : "slack";
         return {
           name: (parsed.name || DEFAULT_CONTACT.name).trim() || DEFAULT_CONTACT.name,
           avatarDataUrl: parsed.avatarDataUrl || null,
-          appearance
+          appearance,
+          skin
         };
       } catch {
         return { ...DEFAULT_CONTACT };
@@ -834,8 +1151,28 @@
       return mediaQuery.matches ? "dark" : "light";
     }
 
+    function applySkin() {
+      const skin = contact.skin === "whatsapp" ? "whatsapp" : "slack";
+      document.documentElement.setAttribute("data-skin", skin);
+      const toggle = document.getElementById("skinToggle");
+      const section = document.getElementById("sectionLabel");
+      const headerBtn = document.getElementById("skinToggleHeader");
+      if (skin === "whatsapp") {
+        toggle.innerHTML = `WhatsApp<small id="skinHint">Click to switch to Slack</small>`;
+        section.textContent = "Chats";
+        headerBtn.title = "Switch to Slack";
+        document.querySelector(".app").setAttribute("aria-label", "WhatsApp");
+      } else {
+        toggle.innerHTML = `Workspace<small id="skinHint">Click to switch to WhatsApp</small>`;
+        section.textContent = "Direct messages";
+        headerBtn.title = "Switch to WhatsApp";
+        document.querySelector(".app").setAttribute("aria-label", "Slack");
+      }
+    }
+
     function applyTheme() {
       document.documentElement.setAttribute("data-theme", resolvedTheme(contact.appearance || "auto"));
+      applySkin();
     }
 
     function saveContact(next) {
@@ -844,6 +1181,14 @@
       applyContact();
       applyTheme();
     }
+
+    function toggleSkin() {
+      const nextSkin = contact.skin === "whatsapp" ? "slack" : "whatsapp";
+      saveContact({ ...contact, skin: nextSkin });
+    }
+
+    document.getElementById("skinToggle").addEventListener("click", toggleSkin);
+    document.getElementById("skinToggleHeader").addEventListener("click", toggleSkin);
 
     function setAppearanceButtons(appearance) {
       draftAppearance = ["light", "dark", "auto"].includes(appearance) ? appearance : "auto";
@@ -951,7 +1296,8 @@
       saveContact({
         name,
         avatarDataUrl: draftAvatar,
-        appearance: draftAppearance
+        appearance: draftAppearance,
+        skin: contact.skin || "slack"
       });
       closeContactModal();
     });
@@ -1034,6 +1380,7 @@
       }
 
       const content = document.createElement("div");
+      content.className = "msg-content";
       const meta = document.createElement("div");
       meta.className = "msg-meta";
       meta.innerHTML = `
@@ -1042,6 +1389,7 @@
 
       const body = document.createElement("div");
       body.className = "msg-body";
+      body.dataset.time = formatTime();
       if (text) body.textContent = text;
 
       attachments.forEach((item) => {
