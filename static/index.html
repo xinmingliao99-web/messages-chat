@@ -94,6 +94,20 @@
     --you-label: #e01e5a;
   }
 
+  /* Slack always reads as aubergine/purple, in either theme. */
+  [data-skin="slack"][data-theme="dark"] {
+    --sidebar-bg: #1a121c;
+    --sidebar-hover: rgba(255, 255, 255, 0.08);
+    --sidebar-active: #1164a3;
+  }
+
+  [data-skin="slack"][data-theme="light"] {
+    --sidebar-bg: #3f0e40;
+    --sidebar-text: #ffffff;
+    --sidebar-muted: rgba(255, 255, 255, 0.7);
+    --sidebar-hover: rgba(255, 255, 255, 0.1);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body {
@@ -109,8 +123,86 @@
 
   .app {
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* ——— Slack top bar (Slack only) ——— */
+  .slack-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 44px;
+    flex-shrink: 0;
+    padding: 0 12px;
+    background: linear-gradient(180deg, #350d36, #26102b);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  }
+
+  .topbar-left, .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .topbar-right { justify-content: flex-end; }
+
+  .topbar-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 15px;
+    cursor: pointer;
     display: grid;
-    grid-template-columns: 260px 1fr;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .topbar-icon:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+  .topbar-search {
+    flex: 0 1 520px;
+    height: 28px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    cursor: text;
+  }
+
+  .topbar-search:hover { background: rgba(255, 255, 255, 0.17); }
+  .topbar-search-icon { font-size: 12px; opacity: 0.85; }
+
+  .topbar-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(145deg, #36c5f0, #2eb67d);
+    margin-left: 6px;
+    cursor: default;
+    flex-shrink: 0;
+  }
+
+  .app-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 64px 260px 1fr;
     min-height: 0;
   }
 
@@ -158,6 +250,89 @@
     color: white;
     background: linear-gradient(145deg, #36c5f0, #2eb67d);
     margin-top: 6px;
+    cursor: default;
+  }
+
+  /* ——— Slack left rail (Slack only) ——— */
+  .slack-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: #1a121c;
+    padding: 10px 0 12px;
+    min-width: 0;
+  }
+
+  .slack-rail-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .slack-rail-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    background: linear-gradient(145deg, #36c5f0, #2eb67d);
+    margin-bottom: 6px;
+    cursor: default;
+    flex-shrink: 0;
+  }
+
+  .slack-rail-btn {
+    width: 48px;
+    height: 44px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 10px;
+  }
+
+  .slack-rail-btn svg { width: 20px; height: 20px; }
+  .slack-rail-btn:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+  .slack-rail-btn.active { background: rgba(255, 255, 255, 0.16); color: #fff; }
+  .slack-rail-label { font-size: 10px; font-weight: 600; line-height: 1; }
+
+  .slack-rail-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .slack-rail-btn.small {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  .slack-rail-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(145deg, #e01e5a, #ecb22e);
+    margin-top: 2px;
     cursor: default;
   }
 
@@ -257,7 +432,7 @@
   }
 
   .workspace-extra {
-    display: none;
+    display: flex;
     align-items: center;
     gap: 2px;
     padding: 0 10px;
@@ -306,6 +481,40 @@
   }
 
   .sidebar-search-row input::placeholder { color: var(--sidebar-muted); }
+
+  /* ——— Slack sidebar nav / channels (Slack only) ——— */
+  .slack-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 8px;
+    gap: 1px;
+  }
+
+  .slack-nav-item, .slack-channel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: transparent;
+    color: var(--sidebar-text);
+    font: inherit;
+    font-size: 15px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .slack-nav-item:hover, .slack-channel:hover { background: var(--sidebar-hover); }
+  .slack-nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+
+  .channels-section { padding-bottom: 4px; }
+
+  .channels-section .section-label-row { padding: 10px 10px 4px 16px; }
+
+  .slack-channel { padding: 5px 16px; color: var(--sidebar-muted); }
+  .slack-channel .hash { opacity: 0.75; margin-right: 2px; }
 
   .section-label-row {
     display: flex;
@@ -1010,7 +1219,12 @@
     font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
-  [data-skin="whatsapp"] .app { grid-template-columns: 60px 380px 1fr; }
+  [data-skin="whatsapp"] .slack-topbar,
+  [data-skin="whatsapp"] .slack-rail,
+  [data-skin="whatsapp"] .slack-nav,
+  [data-skin="whatsapp"] .channels-section { display: none; }
+
+  [data-skin="whatsapp"] .app-body { grid-template-columns: 60px 380px 1fr; }
   [data-skin="whatsapp"] .rail { display: flex; }
 
   [data-skin="whatsapp"] .sidebar { border-right: 1px solid var(--separator); }
@@ -1024,8 +1238,6 @@
   }
 
   [data-skin="whatsapp"] .workspace-menu { background: var(--modal-bg); color: var(--sidebar-text); }
-
-  [data-skin="whatsapp"] .workspace-extra { display: flex; }
 
   [data-skin="whatsapp"] .sidebar-search-row {
     padding: 8px 12px 10px;
@@ -1199,107 +1411,170 @@
   [data-skin="whatsapp"] .btn.primary { background: var(--accent); }
 
   @media (max-width: 860px) {
-    .app { grid-template-columns: 1fr !important; }
-    .rail, .sidebar { display: none !important; }
+    .app-body { grid-template-columns: 1fr !important; }
+    .rail, .sidebar, .slack-rail, .slack-topbar { display: none !important; }
   }
 </style>
 </head>
 <body>
 <div class="app" role="application" aria-label="Chat" id="appShell">
-  <nav class="rail" id="navRail" aria-hidden="true">
-    <div class="rail-top">
-      <button type="button" class="rail-btn active" title="Chats">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-      </button>
-      <button type="button" class="rail-btn" title="Status">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5" stroke-dasharray="3.6 3.2"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
-      </button>
-      <button type="button" class="rail-btn" title="Channels">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h1.2l3.8 4.2V6.8L6.2 11H5a2 2 0 0 0-2 2z"/><path d="M13.5 8.2a4 4 0 0 1 0 7.6"/><path d="M17 5.5a8 8 0 0 1 0 13"/></svg>
-      </button>
-      <button type="button" class="rail-btn" title="Communities">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="10" cy="7" r="3.2"/><path d="M22 20v-1a4 4 0 0 0-3-3.87"/><path d="M16 4.13a3.2 3.2 0 0 1 0 6.2"/></svg>
-      </button>
-      <button type="button" class="rail-btn" title="Meta AI">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z"/></svg>
-      </button>
+  <header class="slack-topbar" id="slackTopbar" aria-hidden="true">
+    <div class="topbar-left">
+      <button type="button" class="topbar-icon" title="Back" tabindex="-1">‹</button>
+      <button type="button" class="topbar-icon" title="Forward" tabindex="-1">›</button>
+      <button type="button" class="topbar-icon" title="History" tabindex="-1">🕘</button>
     </div>
-    <div class="rail-bottom">
-      <button type="button" class="rail-btn" title="Settings">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l1.9-1.4-2-3.4-2.2.9a8 8 0 0 0-1.7-1L15 4h-6l-.4 2.1a8 8 0 0 0-1.7 1l-2.2-.9-2 3.4L4.6 11a7.97 7.97 0 0 0 0 2l-1.9 1.4 2 3.4 2.2-.9a8 8 0 0 0 1.7 1L9 20h6l.4-2.1a8 8 0 0 0 1.7-1l2.2.9 2-3.4z"/></svg>
-      </button>
-      <div class="rail-avatar" id="railAvatar">Y</div>
+    <div class="topbar-search">
+      <span class="topbar-search-icon" aria-hidden="true">🔍</span>
+      <span id="topbarSearchText">Search Workspace</span>
     </div>
-  </nav>
+    <div class="topbar-right">
+      <button type="button" class="topbar-icon" title="Help" tabindex="-1">﹖</button>
+      <div class="topbar-avatar" id="topbarAvatar">Y</div>
+    </div>
+  </header>
 
-  <aside class="sidebar">
-    <div class="workspace-bar">
-      <div class="workspace-wrap" id="workspaceWrap">
-        <button type="button" class="workspace" id="skinToggle" aria-haspopup="menu" aria-expanded="false">
-          <span id="workspaceLabel">Workspace</span>
-          <span class="workspace-caret" aria-hidden="true">▾</span>
+  <div class="app-body">
+    <nav class="rail" id="navRail" aria-hidden="true">
+      <div class="rail-top">
+        <button type="button" class="rail-btn active" title="Chats">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         </button>
-        <div class="workspace-menu" id="workspaceMenu" role="menu" hidden>
-          <button type="button" role="menuitem" data-skin="slack" id="menuSlack">Slack</button>
-          <button type="button" role="menuitem" data-skin="whatsapp" id="menuWhatsapp">WhatsApp</button>
+        <button type="button" class="rail-btn" title="Status">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5" stroke-dasharray="3.6 3.2"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button type="button" class="rail-btn" title="Channels">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h1.2l3.8 4.2V6.8L6.2 11H5a2 2 0 0 0-2 2z"/><path d="M13.5 8.2a4 4 0 0 1 0 7.6"/><path d="M17 5.5a8 8 0 0 1 0 13"/></svg>
+        </button>
+        <button type="button" class="rail-btn" title="Communities">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="10" cy="7" r="3.2"/><path d="M22 20v-1a4 4 0 0 0-3-3.87"/><path d="M16 4.13a3.2 3.2 0 0 1 0 6.2"/></svg>
+        </button>
+        <button type="button" class="rail-btn" title="Meta AI">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z"/></svg>
+        </button>
+      </div>
+      <div class="rail-bottom">
+        <button type="button" class="rail-btn" title="Settings">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l1.9-1.4-2-3.4-2.2.9a8 8 0 0 0-1.7-1L15 4h-6l-.4 2.1a8 8 0 0 0-1.7 1l-2.2-.9-2 3.4L4.6 11a7.97 7.97 0 0 0 0 2l-1.9 1.4 2 3.4 2.2-.9a8 8 0 0 0 1.7 1L9 20h6l.4-2.1a8 8 0 0 0 1.7-1l2.2.9 2-3.4z"/></svg>
+        </button>
+        <div class="rail-avatar" id="railAvatar">Y</div>
+      </div>
+    </nav>
+
+    <nav class="slack-rail" id="slackRail" aria-hidden="true">
+      <div class="slack-rail-top">
+        <div class="slack-rail-badge" id="slackRailBadge">W</div>
+        <button type="button" class="slack-rail-btn active" title="Home" tabindex="-1">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1h4v-6h3v6h4a1 1 0 0 0 1-1v-9"/></svg>
+          <span class="slack-rail-label">Home</span>
+        </button>
+        <button type="button" class="slack-rail-btn" title="DMs" tabindex="-1">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <span class="slack-rail-label">DMs</span>
+        </button>
+        <button type="button" class="slack-rail-btn" title="Activity" tabindex="-1">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 4-2 5-2 7h16c0-2-2-3-2-7"/><path d="M9.5 20a2.5 2.5 0 0 0 5 0"/></svg>
+          <span class="slack-rail-label">Activity</span>
+        </button>
+        <button type="button" class="slack-rail-btn" title="Files" tabindex="-1">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/></svg>
+          <span class="slack-rail-label">Files</span>
+        </button>
+        <button type="button" class="slack-rail-btn" title="More" tabindex="-1">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+          <span class="slack-rail-label">More</span>
+        </button>
+      </div>
+      <div class="slack-rail-bottom">
+        <button type="button" class="slack-rail-btn small" title="Add" tabindex="-1">+</button>
+        <button type="button" class="slack-rail-btn small" title="Theme" tabindex="-1">☾</button>
+        <div class="slack-rail-avatar" id="slackRailAvatar">Y</div>
+      </div>
+    </nav>
+
+    <aside class="sidebar">
+      <div class="workspace-bar">
+        <div class="workspace-wrap" id="workspaceWrap">
+          <button type="button" class="workspace" id="skinToggle" aria-haspopup="menu" aria-expanded="false">
+            <span id="workspaceLabel">Workspace</span>
+            <span class="workspace-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="workspace-menu" id="workspaceMenu" role="menu" hidden>
+            <button type="button" role="menuitem" data-skin="slack" id="menuSlack">Slack</button>
+            <button type="button" role="menuitem" data-skin="whatsapp" id="menuWhatsapp">WhatsApp</button>
+          </div>
+        </div>
+        <div class="workspace-extra">
+          <button type="button" id="addChatBtn" title="New chat" aria-label="New chat">+</button>
+          <button type="button" id="moreMenuBtn" title="Menu" aria-label="Menu">⋮</button>
         </div>
       </div>
-      <div class="workspace-extra">
-        <button type="button" id="addChatBtn" title="New chat" aria-label="New chat">+</button>
-        <button type="button" id="moreMenuBtn" title="Menu" aria-label="Menu">⋮</button>
+
+      <div class="sidebar-search-row">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input type="text" id="convSearch" placeholder="Search" />
       </div>
-    </div>
 
-    <div class="sidebar-search-row">
-      <span class="search-icon" aria-hidden="true">🔍</span>
-      <input type="text" id="convSearch" placeholder="Search" />
-    </div>
+      <nav class="slack-nav" id="slackNav" aria-hidden="true">
+        <button type="button" class="slack-nav-item" tabindex="-1"><span class="slack-nav-icon">🤖</span> Slackbot</button>
+        <button type="button" class="slack-nav-item" tabindex="-1"><span class="slack-nav-icon">🎧</span> Huddles</button>
+        <button type="button" class="slack-nav-item" tabindex="-1"><span class="slack-nav-icon">👥</span> Directories</button>
+      </nav>
 
-    <div class="section-label-row" id="sectionLabelRow">
-      <div class="section-label">Direct messages</div>
-      <button type="button" class="add-dm-btn" id="addDmBtn" title="Add person" aria-label="Add person">+</button>
-    </div>
-
-    <div class="filter-pills" id="filterPills">
-      <button type="button" class="pill active" data-filter="all">All</button>
-      <button type="button" class="pill" data-filter="unread">Unread</button>
-      <button type="button" class="pill" data-filter="favorites">Favorites</button>
-      <button type="button" class="pill" data-filter="groups">Groups</button>
-    </div>
-
-    <div class="conv-list" id="convList"></div>
-  </aside>
-
-  <section class="main">
-    <header class="chat-header">
-      <div class="chat-person" id="openContact" title="Edit profile" role="button" tabindex="0">
-        <div class="conv-avatar header-avatar" id="headerAvatar"></div>
-        <div class="chat-person-text">
-          <div class="name" id="headerName">Suchen</div>
-          <div class="chat-person-sub">online</div>
+      <div class="channels-section" id="channelsSection" aria-hidden="true">
+        <div class="section-label-row">
+          <div class="section-label">Channels</div>
         </div>
+        <button type="button" class="slack-channel" tabindex="-1"><span class="hash">#</span>general</button>
+        <button type="button" class="slack-channel" tabindex="-1"><span class="hash">#</span>random</button>
       </div>
-      <div class="header-actions">
-        <button type="button" id="detailsBtn" title="Edit profile" aria-label="Edit profile">ⓘ</button>
+
+      <div class="section-label-row" id="sectionLabelRow">
+        <div class="section-label">Direct messages</div>
+        <button type="button" class="add-dm-btn" id="addDmBtn" title="Add person" aria-label="Add person">+</button>
       </div>
-    </header>
 
-    <main class="thread" id="thread" aria-live="polite"></main>
+      <div class="filter-pills" id="filterPills">
+        <button type="button" class="pill active" data-filter="all">All</button>
+        <button type="button" class="pill" data-filter="unread">Unread</button>
+        <button type="button" class="pill" data-filter="favorites">Favorites</button>
+        <button type="button" class="pill" data-filter="groups">Groups</button>
+      </div>
 
-    <div class="typing-row" id="typingRow" hidden></div>
+      <div class="conv-list" id="convList"></div>
+    </aside>
 
-    <div class="composer-wrap">
-      <div class="pending" id="pending"></div>
-      <form class="composer" id="composer" autocomplete="off">
-        <textarea id="message" rows="1" placeholder="Message"></textarea>
-        <div class="composer-bar">
-          <button class="icon-btn" type="button" id="attachBtn" title="Attach" aria-label="Attach file">+</button>
-          <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.doc,.docx,.md,.csv" />
-          <button id="send" type="submit">Send</button>
+    <section class="main">
+      <header class="chat-header">
+        <div class="chat-person" id="openContact" title="Edit profile" role="button" tabindex="0">
+          <div class="conv-avatar header-avatar" id="headerAvatar"></div>
+          <div class="chat-person-text">
+            <div class="name" id="headerName">Suchen</div>
+            <div class="chat-person-sub">online</div>
+          </div>
         </div>
-      </form>
-    </div>
-  </section>
+        <div class="header-actions">
+          <button type="button" id="detailsBtn" title="Edit profile" aria-label="Edit profile">ⓘ</button>
+        </div>
+      </header>
+
+      <main class="thread" id="thread" aria-live="polite"></main>
+
+      <div class="typing-row" id="typingRow" hidden></div>
+
+      <div class="composer-wrap">
+        <div class="pending" id="pending"></div>
+        <form class="composer" id="composer" autocomplete="off">
+          <textarea id="message" rows="1" placeholder="Message"></textarea>
+          <div class="composer-bar">
+            <button class="icon-btn" type="button" id="attachBtn" title="Attach" aria-label="Attach file">+</button>
+            <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.doc,.docx,.md,.csv" />
+            <button id="send" type="submit">Send</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
 </div>
 
 <div class="modal-backdrop" id="personModal" role="dialog" aria-modal="true" aria-labelledby="personModalTitle">
@@ -1472,11 +1747,14 @@
   function applySkin() {
     document.documentElement.setAttribute("data-skin", state.skin);
     const isWa = state.skin === "whatsapp";
-    document.getElementById("workspaceLabel").textContent = isWa ? "WhatsApp" : "Workspace";
+    const workspaceLabel = document.getElementById("workspaceLabel");
+    workspaceLabel.textContent = isWa ? "WhatsApp" : "Workspace";
     document.getElementById("menuSlack").classList.toggle("active", !isWa);
     document.getElementById("menuWhatsapp").classList.toggle("active", isWa);
     document.getElementById("sectionLabelRow").hidden = false;
-    searchInput.placeholder = isWa ? "Search or start a new chat" : "Search";
+    searchInput.placeholder = isWa ? "Search or start a new chat" : "Find a conversation...";
+    const topbarSearchText = document.getElementById("topbarSearchText");
+    if (topbarSearchText) topbarSearchText.textContent = "Search " + workspaceLabel.textContent;
     document.querySelector(".app").setAttribute("aria-label", isWa ? "WhatsApp" : "Slack");
     renderConvList();
     renderActiveHeader();
