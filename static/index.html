@@ -769,14 +769,6 @@
         </div>
         <p class="style-hint" id="appearanceHint">Matches your system: light by day, dark at night.</p>
       </div>
-      <div class="style-field">
-        <span>Message style</span>
-        <div class="style-switch" role="group" aria-label="Message style">
-          <button type="button" id="styleAssistant" data-style="assistant">AI style</button>
-          <button type="button" id="styleFriend" data-style="friend" class="active">Friend chat</button>
-        </div>
-        <p class="style-hint" id="styleHint">Casual texts — short, natural, no bullet lists.</p>
-      </div>
       <div class="btn-row">
         <button type="button" class="btn ghost" id="cancelContactBtn">Cancel</button>
         <button type="button" class="btn primary" id="saveContactBtn">Save</button>
@@ -800,11 +792,7 @@
     const typingRow = document.getElementById("typingRow");
 
     const STORAGE_KEY = "messages-chat-contact";
-    const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, style: "friend", appearance: "auto" };
-    const STYLE_HINTS = {
-      assistant: "Clearer answers — can use dashes and bullet points.",
-      friend: "Casual texts — short, natural, no bullet lists."
-    };
+    const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, appearance: "auto" };
     const APPEARANCE_HINTS = {
       light: "Always use bright Slack look.",
       dark: "Always use dark Slack look.",
@@ -813,7 +801,6 @@
 
     let contact = loadContact();
     let draftAvatar = contact.avatarDataUrl;
-    let draftStyle = contact.style || "friend";
     let draftAppearance = contact.appearance || "auto";
     let mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -829,14 +816,12 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return { ...DEFAULT_CONTACT };
         const parsed = JSON.parse(raw);
-        const style = parsed.style === "assistant" ? "assistant" : "friend";
         const appearance = ["light", "dark", "auto"].includes(parsed.appearance)
           ? parsed.appearance
           : "auto";
         return {
           name: (parsed.name || DEFAULT_CONTACT.name).trim() || DEFAULT_CONTACT.name,
           avatarDataUrl: parsed.avatarDataUrl || null,
-          style,
           appearance
         };
       } catch {
@@ -858,13 +843,6 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(contact));
       applyContact();
       applyTheme();
-    }
-
-    function setStyleButtons(style) {
-      draftStyle = style === "assistant" ? "assistant" : "friend";
-      document.getElementById("styleAssistant").classList.toggle("active", draftStyle === "assistant");
-      document.getElementById("styleFriend").classList.toggle("active", draftStyle === "friend");
-      document.getElementById("styleHint").textContent = STYLE_HINTS[draftStyle];
     }
 
     function setAppearanceButtons(appearance) {
@@ -913,7 +891,6 @@
     function openContactModal() {
       contactNameInput.value = contact.name;
       draftAvatar = contact.avatarDataUrl;
-      setStyleButtons(contact.style || "friend");
       setAppearanceButtons(contact.appearance || "auto");
       paintAvatar(modalAvatar, contact.name, draftAvatar);
       contactModal.classList.add("open");
@@ -924,7 +901,6 @@
     function closeContactModal() {
       contactModal.classList.remove("open");
       draftAvatar = contact.avatarDataUrl;
-      draftStyle = contact.style || "friend";
       draftAppearance = contact.appearance || "auto";
     }
 
@@ -944,8 +920,6 @@
       if (e.key === "Escape" && contactModal.classList.contains("open")) closeContactModal();
     });
 
-    document.getElementById("styleAssistant").addEventListener("click", () => setStyleButtons("assistant"));
-    document.getElementById("styleFriend").addEventListener("click", () => setStyleButtons("friend"));
     document.getElementById("appearanceLight").addEventListener("click", () => setAppearanceButtons("light"));
     document.getElementById("appearanceDark").addEventListener("click", () => setAppearanceButtons("dark"));
     document.getElementById("appearanceAuto").addEventListener("click", () => setAppearanceButtons("auto"));
@@ -977,7 +951,6 @@
       saveContact({
         name,
         avatarDataUrl: draftAvatar,
-        style: draftStyle,
         appearance: draftAppearance
       });
       closeContactModal();
@@ -1143,7 +1116,6 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contact_name: contact.name,
-            style: contact.style || "friend",
             messages: history
           })
         });

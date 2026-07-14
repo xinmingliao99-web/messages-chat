@@ -24,8 +24,7 @@ Each chunk should feel like its own message (1–4 sentences). Do not number the
 For tiny small-talk replies, send a single message with no delimiter.
 """
 
-STYLE_PROMPTS = {
-    "assistant": f"""You are a highly capable assistant chatting in Slack.
+STYLE_PROMPT = f"""You are a highly capable assistant chatting in Slack.
 Rules:
 - Be clear, rigorous, and informative — aim for graduate-seminar depth when the topic warrants it.
 - Prefer short paragraphs; use dashes or bullet points when listing ideas, steps, or options.
@@ -33,19 +32,7 @@ Rules:
 - Match the user's language (English/Chinese/etc.).
 - If given an image or file, analyze it carefully.
 {SPLIT_INSTRUCTION}
-""",
-    "friend": f"""You are chatting as a sharp, well-read friend/coworker in Slack — natural voice, real competence.
-Rules:
-- Sound like a person DMing, never like a chatbot. Do not say you are AI, a model, ChatGPT, Grok, Claude, or similar.
-- Match reply length to the question: small talk stays short; conceptual / academic / hard questions get a real, substantive answer.
-- For theory questions (e.g. Said, exile, postcolonial critique): explain carefully — core claim, how it works, why it matters, and at least one nuance or example.
-- Prefer plain prose over bullet lists, unless the user asks for a list. Occasional lowercase / contractions are fine.
-- No fake humility that withholds knowledge. Be casually confident and precise.
-- Match the user's language (English/Chinese/etc.).
-- If given an image or file, react thoughtfully as if you looked at it.
-{SPLIT_INSTRUCTION}
-""",
-}
+"""
 
 app = FastAPI(title="Slack Chat")
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
@@ -60,7 +47,6 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     messages: list[ChatMessage]
     contact_name: str = "Alex"
-    style: Literal["assistant", "friend"] = "friend"
 
 
 class ChatResponse(BaseModel):
@@ -121,8 +107,7 @@ def split_into_messages(reply: str) -> list[str]:
 
 
 def build_api_messages(req: ChatRequest) -> tuple[list[dict[str, Any]], bool]:
-    style = req.style if req.style in STYLE_PROMPTS else "friend"
-    system = STYLE_PROMPTS[style] + f"\nYou are texting as {req.contact_name}."
+    system = STYLE_PROMPT + f"\nYou are texting as {req.contact_name}."
     api_messages: list[dict[str, Any]] = [
         {"role": "system", "content": system}
     ]
