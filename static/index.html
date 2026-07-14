@@ -1,1564 +1,2074 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light dark" />
-  <title>Slack</title>
-  <script>
-    (function () {
-      try {
-        var raw = localStorage.getItem("messages-chat-contact");
-        var appearance = "auto";
-        var skin = "slack";
-        if (raw) {
-          var parsed = JSON.parse(raw);
-          if (parsed && (parsed.appearance === "light" || parsed.appearance === "dark" || parsed.appearance === "auto")) {
-            appearance = parsed.appearance;
-          }
-          if (parsed && (parsed.skin === "slack" || parsed.skin === "whatsapp")) {
-            skin = parsed.skin;
-          }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>Workspace</title>
+<script>
+  (function () {
+    try {
+      var raw = localStorage.getItem("messages-chat-contact");
+      var appearance = "auto";
+      var skin = "slack";
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && (parsed.appearance === "light" || parsed.appearance === "dark" || parsed.appearance === "auto")) {
+          appearance = parsed.appearance;
         }
-        var theme = appearance === "auto"
-          ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-          : appearance;
-        document.documentElement.setAttribute("data-theme", theme);
-        document.documentElement.setAttribute("data-skin", skin);
-      } catch (e) {
-        document.documentElement.setAttribute("data-theme", "dark");
-        document.documentElement.setAttribute("data-skin", "slack");
+        if (parsed && parsed.skin === "whatsapp") {
+          skin = "whatsapp";
+        }
       }
-    })();
-  </script>
-  <style>
-    :root, [data-theme="dark"] {
-      color-scheme: dark;
-      --page-bg: #1a1d21;
-      --sidebar-bg: #19171d;
-      --sidebar-text: #d1d2d3;
-      --sidebar-muted: #ababad;
-      --sidebar-hover: rgba(255, 255, 255, 0.06);
-      --sidebar-active: #1164a3;
-      --workspace: #350d36;
-      --main-bg: #1a1d21;
-      --header-bg: #1a1d21;
-      --text: #d1d2d3;
-      --text-strong: #f8f8f8;
-      --text-secondary: #ababad;
-      --separator: rgba(255, 255, 255, 0.1);
-      --hover: rgba(255, 255, 255, 0.04);
-      --composer-border: #565856;
-      --composer-bg: #222529;
-      --input-bg: #222529;
-      --msg-hover: rgba(255, 255, 255, 0.03);
-      --link: #1d9bd1;
-      --accent: #007a5a;
-      --modal-bg: #1a1d21;
-      --modal-overlay: rgba(0, 0, 0, 0.55);
-      --card-bg: #222529;
-      --search-bg: rgba(255, 255, 255, 0.08);
-      --segment-bg: rgba(255, 255, 255, 0.08);
-      --segment-active: #222529;
-      --you-label: #e01e5a;
-    }
-
-    [data-theme="light"] {
-      color-scheme: light;
-      --page-bg: #ffffff;
-      --sidebar-bg: #3f0e40;
-      --sidebar-text: #ffffff;
-      --sidebar-muted: rgba(255, 255, 255, 0.7);
-      --sidebar-hover: rgba(255, 255, 255, 0.1);
-      --sidebar-active: #1164a3;
-      --workspace: #350d36;
-      --main-bg: #ffffff;
-      --header-bg: #ffffff;
-      --text: #1d1c1d;
-      --text-strong: #1d1c1d;
-      --text-secondary: #616061;
-      --separator: rgba(29, 28, 29, 0.13);
-      --hover: rgba(29, 28, 29, 0.04);
-      --composer-border: #868686;
-      --composer-bg: #ffffff;
-      --input-bg: #ffffff;
-      --msg-hover: rgba(29, 28, 29, 0.04);
-      --link: #1264a3;
-      --accent: #007a5a;
-      --modal-bg: #ffffff;
-      --modal-overlay: rgba(0, 0, 0, 0.4);
-      --card-bg: #f8f8f8;
-      --search-bg: rgba(255, 255, 255, 0.15);
-      --segment-bg: #f2f2f2;
-      --segment-active: #ffffff;
-      --you-label: #e01e5a;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
-      background: var(--page-bg);
-      color: var(--text);
-      font-family: "Slack-Lato", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI",
-        Helvetica, Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .app {
-      height: 100%;
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      min-height: 0;
-    }
-
-    .sidebar {
-      background: var(--sidebar-bg);
-      color: var(--sidebar-text);
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      border-right: 1px solid rgba(0, 0, 0, 0.2);
-    }
-
-    .workspace {
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      font-weight: 700;
-      font-size: 17px;
-      letter-spacing: -0.02em;
-      appearance: none;
-      border: 0;
-      background: transparent;
-      color: inherit;
-      text-align: left;
-      width: 100%;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .workspace:hover { background: var(--sidebar-hover); }
-
-    .workspace small {
-      display: block;
-      margin-top: 2px;
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--sidebar-muted);
-    }
-
-    .sidebar-search {
-      padding: 10px 12px 6px;
-    }
-
-    .sidebar-search input {
-      width: 100%;
-      height: 30px;
-      border: 0;
-      border-radius: 6px;
-      outline: none;
-      background: var(--search-bg);
-      color: inherit;
-      padding: 0 10px;
-      font: inherit;
-      font-size: 13px;
-    }
-
-    .sidebar-search input::placeholder { color: var(--sidebar-muted); }
-
-    .section-label {
-      padding: 14px 16px 6px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--sidebar-muted);
-      text-transform: none;
-    }
-
-    .conv-list { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
-
-    .conv {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 8px;
-      border-radius: 6px;
-      cursor: default;
-      color: var(--sidebar-text);
-      font-size: 15px;
-    }
-
-    .conv:hover { background: var(--sidebar-hover); }
-    .conv.active {
-      background: var(--sidebar-active);
-      color: #fff;
-    }
-
-    .conv-avatar {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      display: grid;
-      place-items: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: white;
-      background: linear-gradient(145deg, #e01e5a, #ecb22e);
-      background-size: cover;
-      background-position: center;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .conv-avatar.green { background: linear-gradient(145deg, #2eb67d, #007a5a); }
-    .conv-avatar.orange { background: linear-gradient(145deg, #ecb22e, #e01e5a); }
-    .conv-avatar.has-photo { color: transparent; font-size: 0; }
-
-    .conv-name {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-weight: 500;
-    }
-
-    .presence {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #2eb67d;
-      margin-left: auto;
-      flex-shrink: 0;
-    }
-
-    .main {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      background: var(--main-bg);
-    }
-
-    .chat-header {
-      height: 49px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      border-bottom: 1px solid var(--separator);
-      background: var(--header-bg);
-    }
-
-    .chat-person {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      border-radius: 6px;
-      padding: 4px 6px;
-      margin-left: -6px;
-    }
-
-    .chat-person:hover { background: var(--hover); }
-
-    .chat-person .name {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--text-strong);
-      letter-spacing: -0.02em;
-    }
-
-    .header-actions button {
-      width: 32px;
-      height: 32px;
-      border: 0;
-      border-radius: 6px;
-      background: transparent;
-      color: var(--text-secondary);
-      cursor: pointer;
-      font-size: 15px;
-    }
-
-    .header-actions button:hover { background: var(--hover); color: var(--text); }
-
-    .thread {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px 0 8px;
-      scroll-behavior: smooth;
-    }
-
-    .day {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 8px 20px 12px;
-      color: var(--text-secondary);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .day::before, .day::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--separator);
-    }
-
-    .msg {
-      display: grid;
-      grid-template-columns: 40px 1fr;
-      gap: 8px;
-      padding: 8px 20px;
-      animation: rise 0.18s ease-out;
-    }
-
-    .msg:hover { background: var(--msg-hover); }
-
-    .msg-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 6px;
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-      font-weight: 700;
-      color: white;
-      background: linear-gradient(145deg, #e01e5a, #ecb22e);
-      background-size: cover;
-      background-position: center;
-      overflow: hidden;
-      margin-top: 2px;
-    }
-
-    .msg-avatar.you { background: linear-gradient(145deg, #36c5f0, #2eb67d); }
-    .msg-avatar.has-photo { color: transparent; font-size: 0; }
-
-    .msg-meta {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 2px;
-    }
-
-    .msg-author {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--text-strong);
-    }
-
-    .msg-author.you { color: var(--you-label); }
-
-    .msg-time {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-
-    .msg-body {
-      font-size: 15px;
-      line-height: 1.45;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      color: var(--text);
-    }
-
-    .attach-card {
-      margin-top: 8px;
-      border-radius: 8px;
-      overflow: hidden;
-      background: var(--card-bg);
-      border: 1px solid var(--separator);
-      max-width: 320px;
-    }
-
-    .attach-card img {
-      display: block;
-      width: 100%;
-      max-height: 220px;
-      object-fit: cover;
-    }
-
-    .file-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-    }
-
-    .file-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      background: #1264a3;
-      color: white;
-      display: grid;
-      place-items: center;
-      font-size: 11px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .file-icon.pdf { background: #e01e5a; }
-
-    .file-name { font-size: 13px; font-weight: 600; }
-    .file-size { font-size: 12px; color: var(--text-secondary); }
-
-    .typing-row {
-      padding: 4px 20px 10px 68px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      min-height: 24px;
-    }
-
-    .typing-row .dots span {
-      display: inline-block;
-      width: 4px;
-      height: 4px;
-      margin: 0 1px;
-      border-radius: 50%;
-      background: var(--text-secondary);
-      animation: bounce 1.2s infinite ease-in-out;
-    }
-
-    .typing-row .dots span:nth-child(2) { animation-delay: 0.15s; }
-    .typing-row .dots span:nth-child(3) { animation-delay: 0.3s; }
-
-    @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-      30% { transform: translateY(-3px); opacity: 1; }
-    }
-
-    @keyframes rise {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .composer-wrap {
-      flex-shrink: 0;
-      padding: 0 20px 16px;
-    }
-
-    .pending {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 0 0 8px;
-    }
-
-    .pending:empty { display: none; }
-
-    .chip {
-      position: relative;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--separator);
-      background: var(--card-bg);
-      max-width: 140px;
-    }
-
-    .chip img {
-      display: block;
-      width: 140px;
-      height: 90px;
-      object-fit: cover;
-    }
-
-    .chip .file-row { padding: 8px 10px; min-width: 120px; }
-
-    .chip .remove {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 0;
-      background: rgba(0, 0, 0, 0.65);
-      color: white;
-      font-size: 12px;
-      line-height: 1;
-      cursor: pointer;
-    }
-
-    .composer {
-      border: 1px solid var(--composer-border);
-      border-radius: 8px;
-      background: var(--composer-bg);
-      padding: 8px 10px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .composer:focus-within { border-color: var(--text-secondary); }
-
-    #message {
-      width: 100%;
-      resize: none;
-      border: 0;
-      outline: none;
-      background: transparent;
-      color: var(--text);
-      font: inherit;
-      font-size: 15px;
-      line-height: 1.4;
-      max-height: 140px;
-      min-height: 24px;
-      padding: 4px 2px;
-    }
-
-    #message::placeholder { color: var(--text-secondary); }
-
-    .composer-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .icon-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      border: 0;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-    }
-
-    .icon-btn:hover { background: var(--hover); color: var(--text); }
-
-    #send {
-      height: 28px;
-      padding: 0 12px;
-      border-radius: 4px;
-      border: 0;
-      background: var(--accent);
-      color: white;
-      font: inherit;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      opacity: 0.4;
-      pointer-events: none;
-    }
-
-    #send.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    #fileInput, #avatarInput { display: none; }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: var(--modal-overlay);
-      display: none;
-      place-items: center;
-      z-index: 50;
-      padding: 20px;
-    }
-
-    .modal-backdrop.open { display: grid; }
-
-    .modal {
-      width: min(400px, 100%);
-      background: var(--modal-bg);
-      border: 1px solid var(--separator);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-    }
-
-    .modal h2 {
-      font-size: 18px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: var(--text-strong);
-    }
-
-    .modal-avatar-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .modal-avatar-preview {
-      width: 64px;
-      height: 64px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      font-size: 24px;
-      font-weight: 700;
-      color: white;
-      background: linear-gradient(145deg, #e01e5a, #ecb22e);
-      background-size: cover;
-      background-position: center;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .modal-avatar-preview.has-photo { color: transparent; font-size: 0; }
-
-    .modal-avatar-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .modal label, .style-field > span {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-    }
-
-    .modal input[type="text"] {
-      width: 100%;
-      height: 36px;
-      border-radius: 6px;
-      border: 1px solid var(--separator);
-      background: var(--search-bg);
-      color: var(--text);
-      padding: 0 12px;
-      font: inherit;
-      font-size: 14px;
-      outline: none;
-      margin-bottom: 14px;
-    }
-
-    .modal input[type="text"]:focus { border-color: var(--link); }
-
-    .style-field { margin-bottom: 14px; }
-
-    .style-switch {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px;
-      padding: 3px;
-      border-radius: 8px;
-      background: var(--segment-bg);
-      border: 1px solid var(--separator);
-    }
-
-    .style-switch.three { grid-template-columns: 1fr 1fr 1fr; }
-
-    .style-switch button {
-      appearance: none;
-      border: 0;
-      border-radius: 6px;
-      height: 32px;
-      background: transparent;
-      color: var(--text-secondary);
-      font: inherit;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .style-switch button.active {
-      background: var(--segment-active);
-      color: var(--text-strong);
-      box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.12);
-    }
-
-    .style-hint {
-      margin-top: 8px;
-      font-size: 12px;
-      line-height: 1.4;
-      color: var(--text-secondary);
-    }
-
-    .btn-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 4px;
-    }
-
-    .btn {
-      height: 32px;
-      padding: 0 14px;
-      border-radius: 6px;
-      border: 0;
-      font: inherit;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .btn.ghost {
-      background: transparent;
-      color: var(--text-secondary);
-    }
-
-    .btn.ghost:hover { background: var(--hover); color: var(--text); }
-
-    .btn.primary {
-      background: var(--accent);
-      color: white;
-    }
-
-    .btn.secondary {
-      background: var(--segment-bg);
-      color: var(--text);
-    }
-
-    .btn.secondary:hover { background: var(--hover); }
-
-    /* ——— WhatsApp skin ——— */
-    [data-skin="whatsapp"][data-theme="light"] {
-      --page-bg: #f0f2f5;
-      --sidebar-bg: #ffffff;
-      --sidebar-text: #111b21;
-      --sidebar-muted: #667781;
-      --sidebar-hover: #f5f6f6;
-      --sidebar-active: #f0f2f5;
-      --main-bg: #efeae2;
-      --header-bg: #008069;
-      --text: #111b21;
-      --text-strong: #111b21;
-      --text-secondary: #667781;
-      --separator: #d1d7db;
-      --hover: rgba(11, 20, 26, 0.05);
-      --composer-border: transparent;
-      --composer-bg: #f0f2f5;
-      --input-bg: #ffffff;
-      --msg-hover: transparent;
-      --accent: #00a884;
-      --modal-bg: #ffffff;
-      --card-bg: #ffffff;
-      --search-bg: #f0f2f5;
-      --segment-bg: #f0f2f5;
-      --segment-active: #ffffff;
-      --wa-out: #d9fdd3;
-      --wa-in: #ffffff;
-      --wa-header-text: #ffffff;
-    }
-
-    [data-skin="whatsapp"][data-theme="dark"] {
-      --page-bg: #0b141a;
-      --sidebar-bg: #111b21;
-      --sidebar-text: #e9edef;
-      --sidebar-muted: #8696a0;
-      --sidebar-hover: #202c33;
-      --sidebar-active: #2a3942;
-      --main-bg: #0b141a;
-      --header-bg: #202c33;
-      --text: #e9edef;
-      --text-strong: #e9edef;
-      --text-secondary: #8696a0;
-      --separator: #222d34;
-      --hover: rgba(255, 255, 255, 0.04);
-      --composer-border: transparent;
-      --composer-bg: #202c33;
-      --input-bg: #2a3942;
-      --msg-hover: transparent;
-      --accent: #00a884;
-      --modal-bg: #111b21;
-      --card-bg: #202c33;
-      --search-bg: #202c33;
-      --segment-bg: #202c33;
-      --segment-active: #2a3942;
-      --wa-out: #005c4b;
-      --wa-in: #202c33;
-      --wa-header-text: #e9edef;
-    }
-
-    [data-skin="whatsapp"] body {
-      font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    }
-
-    [data-skin="whatsapp"] .sidebar {
-      border-right: 1px solid var(--separator);
-    }
-
-    [data-skin="whatsapp"] .workspace {
-      background: var(--header-bg);
-      color: var(--wa-header-text);
-      border-bottom: 0;
-    }
-
-    [data-skin="whatsapp"] .workspace:hover {
-      filter: brightness(1.05);
-      background: var(--header-bg);
-    }
-
-    [data-skin="whatsapp"] .workspace small {
-      color: rgba(255, 255, 255, 0.75);
-    }
-
-    [data-skin="whatsapp"] .sidebar-search {
-      background: var(--sidebar-bg);
-      padding: 8px 12px 10px;
-    }
-
-    [data-skin="whatsapp"] .sidebar-search input {
-      border-radius: 8px;
-      height: 36px;
-      background: var(--search-bg);
-      color: var(--sidebar-text);
-    }
-
-    [data-skin="whatsapp"] .section-label {
-      color: var(--sidebar-muted);
-      background: var(--sidebar-bg);
-    }
-
-    [data-skin="whatsapp"] .conv {
-      border-radius: 0;
-      padding: 10px 14px;
-      gap: 12px;
-      border-bottom: 1px solid var(--separator);
-      color: var(--sidebar-text);
-    }
-
-    [data-skin="whatsapp"] .conv.active {
-      background: var(--sidebar-active);
-      color: var(--sidebar-text);
-    }
-
-    [data-skin="whatsapp"] .conv-avatar,
-    [data-skin="whatsapp"] .msg-avatar,
-    [data-skin="whatsapp"] .modal-avatar-preview {
-      border-radius: 50%;
-    }
-
-    [data-skin="whatsapp"] .presence { display: none; }
-
-    [data-skin="whatsapp"] .chat-header {
-      background: var(--header-bg);
-      border-bottom: 0;
-      height: 56px;
-    }
-
-    [data-skin="whatsapp"] .chat-person .name,
-    [data-skin="whatsapp"] .header-actions button {
-      color: var(--wa-header-text);
-    }
-
-    [data-skin="whatsapp"] .header-actions button:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--wa-header-text);
-    }
-
-    [data-skin="whatsapp"] .thread {
-      background:
-        linear-gradient(rgba(11, 20, 26, 0.04), rgba(11, 20, 26, 0.04)),
-        var(--main-bg);
-      padding: 12px 16px 8px;
-    }
-
-    [data-skin="whatsapp"][data-theme="dark"] .thread {
-      background: var(--main-bg);
-    }
-
-    [data-skin="whatsapp"] .day {
-      margin: 10px auto 14px;
-      background: var(--card-bg);
-      color: var(--text-secondary);
-      padding: 5px 12px;
-      border-radius: 8px;
-      width: fit-content;
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
-    }
-
-    [data-skin="whatsapp"] .day::before,
-    [data-skin="whatsapp"] .day::after { display: none; }
-
-    [data-skin="whatsapp"] .msg {
-      display: flex;
-      grid-template-columns: none;
-      gap: 0;
-      padding: 2px 0;
-      justify-content: flex-start;
-    }
-
-    [data-skin="whatsapp"] .msg.you { justify-content: flex-end; }
-
-    [data-skin="whatsapp"] .msg:hover { background: transparent; }
-
-    [data-skin="whatsapp"] .msg-avatar { display: none; }
-
-    [data-skin="whatsapp"] .msg-content {
-      max-width: min(78%, 520px);
-      background: var(--wa-in);
-      border-radius: 8px;
-      padding: 6px 8px 4px;
-      box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
-      position: relative;
-    }
-
-    [data-skin="whatsapp"] .msg.you .msg-content {
-      background: var(--wa-out);
-      border-top-right-radius: 0;
-    }
-
-    [data-skin="whatsapp"] .msg.them .msg-content {
-      border-top-left-radius: 0;
-    }
-
-    [data-skin="whatsapp"] .msg-meta {
-      display: none;
-    }
-
-    [data-skin="whatsapp"] .msg-body {
-      font-size: 14.2px;
-      line-height: 1.4;
-      position: relative;
-      padding-right: 52px;
-      padding-bottom: 4px;
-      color: var(--text);
-    }
-
-    [data-skin="whatsapp"] .msg-body::after {
-      content: attr(data-time);
-      position: absolute;
-      right: 4px;
-      bottom: 0;
-      font-size: 11px;
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
-
-    [data-skin="whatsapp"] .typing-row {
-      padding: 4px 8px 8px;
-      color: var(--text-secondary);
-    }
-
-    [data-skin="whatsapp"] .composer-wrap {
-      background: var(--composer-bg);
-      padding: 8px 10px 10px;
-    }
-
-    [data-skin="whatsapp"] .composer {
-      border: 0;
-      background: transparent;
-      border-radius: 0;
-      padding: 0;
-      flex-direction: row;
-      align-items: flex-end;
-      gap: 8px;
-    }
-
-    [data-skin="whatsapp"] .composer:focus-within { border-color: transparent; }
-
-    [data-skin="whatsapp"] #message {
-      background: var(--input-bg);
-      border-radius: 24px;
-      padding: 10px 14px;
-      font-size: 15px;
-      min-height: 42px;
-    }
-
-    [data-skin="whatsapp"] .composer-bar {
-      display: contents;
-    }
-
-    [data-skin="whatsapp"] .icon-btn {
-      order: -1;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      color: var(--text-secondary);
-      font-size: 22px;
-    }
-
-    [data-skin="whatsapp"] #send {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      padding: 0;
-      background: var(--accent);
-      font-size: 0;
-      position: relative;
-    }
-
-    [data-skin="whatsapp"] #send::before {
-      content: "➤";
-      font-size: 16px;
-      color: white;
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-    }
-
-    [data-skin="whatsapp"] .btn.primary {
-      background: var(--accent);
-    }
-
-    @media (max-width: 720px) {
-      .app { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
-      [data-skin="whatsapp"] .app.show-chats {
-        grid-template-columns: 1fr;
-      }
-      [data-skin="whatsapp"] .app.show-chats .sidebar { display: flex; }
-      [data-skin="whatsapp"] .app.show-chats .main { display: none; }
-    }
-  </style>
+      var theme = appearance === "auto"
+        ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        : appearance;
+      document.documentElement.setAttribute("data-theme", theme);
+      document.documentElement.setAttribute("data-skin", skin);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "dark");
+      document.documentElement.setAttribute("data-skin", "slack");
+    }
+  })();
+</script>
+<style>
+  :root, [data-theme="dark"] {
+    color-scheme: dark;
+    --page-bg: #1a1d21;
+    --sidebar-bg: #19171d;
+    --sidebar-text: #d1d2d3;
+    --sidebar-muted: #ababad;
+    --sidebar-hover: rgba(255, 255, 255, 0.06);
+    --sidebar-active: #1164a3;
+    --main-bg: #1a1d21;
+    --header-bg: #1a1d21;
+    --header-text: #f8f8f8;
+    --header-icon: #ababad;
+    --text: #d1d2d3;
+    --text-strong: #f8f8f8;
+    --text-secondary: #ababad;
+    --separator: rgba(255, 255, 255, 0.1);
+    --hover: rgba(255, 255, 255, 0.04);
+    --composer-border: #565856;
+    --composer-bg: #222529;
+    --input-bg: #222529;
+    --msg-hover: rgba(255, 255, 255, 0.03);
+    --accent: #007a5a;
+    --modal-bg: #1a1d21;
+    --modal-overlay: rgba(0, 0, 0, 0.55);
+    --card-bg: #222529;
+    --search-bg: rgba(255, 255, 255, 0.08);
+    --segment-bg: rgba(255, 255, 255, 0.08);
+    --segment-active: #222529;
+    --you-label: #e01e5a;
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+    --page-bg: #ffffff;
+    --sidebar-bg: #3f0e40;
+    --sidebar-text: #ffffff;
+    --sidebar-muted: rgba(255, 255, 255, 0.7);
+    --sidebar-hover: rgba(255, 255, 255, 0.1);
+    --sidebar-active: #1164a3;
+    --main-bg: #ffffff;
+    --header-bg: #ffffff;
+    --header-text: #1d1c1d;
+    --header-icon: #616061;
+    --text: #1d1c1d;
+    --text-strong: #1d1c1d;
+    --text-secondary: #616061;
+    --separator: rgba(29, 28, 29, 0.13);
+    --hover: rgba(29, 28, 29, 0.04);
+    --composer-border: #868686;
+    --composer-bg: #ffffff;
+    --input-bg: #ffffff;
+    --msg-hover: rgba(29, 28, 29, 0.04);
+    --accent: #007a5a;
+    --modal-bg: #ffffff;
+    --modal-overlay: rgba(0, 0, 0, 0.4);
+    --card-bg: #f8f8f8;
+    --search-bg: rgba(255, 255, 255, 0.15);
+    --segment-bg: #f2f2f2;
+    --segment-active: #ffffff;
+    --you-label: #e01e5a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--page-bg);
+    color: var(--text);
+    font-family: "Slack-Lato", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font-family: inherit; }
+
+  .app {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 0;
+  }
+
+  /* ——— Left icon rail (WhatsApp only) ——— */
+  .rail {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--rail-bg, #111b21);
+    padding: 12px 0 14px;
+    min-width: 0;
+  }
+
+  .rail-top, .rail-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .rail-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--rail-icon, #aebac1);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .rail-btn:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+  .rail-btn.active { color: var(--rail-active, #fff); }
+
+  .rail-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(145deg, #36c5f0, #2eb67d);
+    margin-top: 6px;
+    cursor: default;
+  }
+
+  .sidebar {
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  .workspace-bar {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .workspace-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .workspace {
+    padding: 14px 16px;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .workspace:hover { background: var(--sidebar-hover); }
+
+  .workspace-caret {
+    font-size: 10px;
+    opacity: 0.7;
+    color: var(--sidebar-muted);
+    transition: transform 0.15s ease;
+  }
+
+  .workspace-wrap.open .workspace-caret { transform: rotate(180deg); }
+
+  .workspace-menu {
+    display: none;
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: calc(100% - 4px);
+    z-index: 20;
+    background: var(--modal-bg);
+    color: var(--text);
+    border: 1px solid var(--separator);
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  .workspace-wrap.open .workspace-menu { display: block; }
+
+  .workspace-menu button {
+    width: 100%;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .workspace-menu button:hover { background: var(--hover); }
+
+  .workspace-menu button.active::after {
+    content: "✓";
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .workspace-extra {
+    display: none;
+    align-items: center;
+    gap: 2px;
+    padding: 0 10px;
+  }
+
+  .workspace-extra button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    color: var(--header-icon, var(--sidebar-muted));
+    font-size: 18px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .workspace-extra button:hover { background: var(--sidebar-hover); }
+
+  .sidebar-search-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px 6px;
+  }
+
+  .sidebar-search-row .search-icon {
+    font-size: 13px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  .sidebar-search-row input {
+    flex: 1;
+    width: 100%;
+    height: 30px;
+    border: 0;
+    border-radius: 6px;
+    outline: none;
+    background: var(--search-bg);
+    color: inherit;
+    padding: 0 10px;
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .sidebar-search-row input::placeholder { color: var(--sidebar-muted); }
+
+  .section-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 10px 6px 16px;
+    gap: 8px;
+  }
+
+  .section-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sidebar-muted);
+  }
+
+  .add-dm-btn {
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--sidebar-muted);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .add-dm-btn:hover { background: var(--sidebar-hover); color: var(--sidebar-text); }
+
+  .filter-pills {
+    display: none;
+    gap: 8px;
+    padding: 8px 12px 10px;
+    overflow-x: auto;
+  }
+
+  .pill {
+    appearance: none;
+    border: 0;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--pill-bg, var(--search-bg));
+    color: var(--sidebar-text);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .pill.active {
+    background: var(--pill-active-bg, var(--accent));
+    color: var(--pill-active-text, #fff);
+  }
+
+  .conv-list { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
+
+  .conv {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--sidebar-text);
+    font-size: 15px;
+    width: 100%;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    font-family: inherit;
+  }
+
+  .conv:hover { background: var(--sidebar-hover); }
+  .conv.active { background: var(--sidebar-active); color: #fff; }
+
+  .conv-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(145deg, #e01e5a, #ecb22e);
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .conv-avatar.green { background: linear-gradient(145deg, #2eb67d, #007a5a); }
+  .conv-avatar.orange { background: linear-gradient(145deg, #ecb22e, #e01e5a); }
+  .conv-avatar.blue { background: linear-gradient(145deg, #36c5f0, #1264a3); }
+  .conv-avatar.purple { background: linear-gradient(145deg, #8e5cf7, #4a154b); }
+  .conv-avatar.has-photo { color: transparent; font-size: 0; }
+
+  .conv-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+  .conv-top-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+
+  .conv-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+
+  .conv-time { display: none; font-size: 12px; color: var(--sidebar-muted); flex-shrink: 0; }
+
+  .conv-preview {
+    display: none;
+    font-size: 13px;
+    color: var(--sidebar-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .conv.active .conv-preview, .conv.active .conv-time { color: rgba(255, 255, 255, 0.75); }
+
+  .presence {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2eb67d;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--main-bg);
+  }
+
+  .chat-header {
+    height: 49px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--separator);
+    background: var(--header-bg);
+  }
+
+  .chat-person {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 4px 6px;
+    margin-left: -6px;
+  }
+
+  .chat-person:hover { background: var(--hover); }
+
+  .header-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+    display: none;
+  }
+
+  .chat-person-text { display: flex; flex-direction: column; }
+
+  .chat-person .name {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--header-text);
+    letter-spacing: -0.02em;
+  }
+
+  .chat-person-sub {
+    display: none;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .header-actions { display: flex; align-items: center; gap: 2px; }
+
+  .header-actions button {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--header-icon);
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .header-actions button:hover { background: var(--hover); }
+
+  .thread {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0 8px;
+    scroll-behavior: smooth;
+  }
+
+  .day {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 20px 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .day::before, .day::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--separator);
+  }
+
+  .msg {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 8px;
+    padding: 8px 20px;
+    animation: rise 0.18s ease-out;
+  }
+
+  .msg:hover { background: var(--msg-hover); }
+
+  .msg-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(145deg, #e01e5a, #ecb22e);
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    margin-top: 2px;
+  }
+
+  .msg-avatar.green { background: linear-gradient(145deg, #2eb67d, #007a5a); }
+  .msg-avatar.orange { background: linear-gradient(145deg, #ecb22e, #e01e5a); }
+  .msg-avatar.blue { background: linear-gradient(145deg, #36c5f0, #1264a3); }
+  .msg-avatar.purple { background: linear-gradient(145deg, #8e5cf7, #4a154b); }
+  .msg-avatar.you { background: linear-gradient(145deg, #36c5f0, #2eb67d); }
+  .msg-avatar.has-photo { color: transparent; font-size: 0; }
+
+  .msg-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+
+  .msg-author {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-strong);
+  }
+
+  .msg-author.you { color: var(--you-label); }
+
+  .msg-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .msg-body {
+    font-size: 15px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: var(--text);
+  }
+
+  .attach-card {
+    margin-top: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid var(--separator);
+    max-width: 320px;
+  }
+
+  .attach-card img {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+  }
+
+  .file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .file-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #1264a3;
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .file-icon.pdf { background: #e01e5a; }
+
+  .file-name { font-size: 13px; font-weight: 600; }
+  .file-size { font-size: 12px; color: var(--text-secondary); }
+
+  .typing-row {
+    padding: 4px 20px 10px 68px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    min-height: 24px;
+  }
+
+  .typing-row .dots span {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    margin: 0 1px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+
+  .typing-row .dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-row .dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-3px); opacity: 1; }
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .composer-wrap {
+    flex-shrink: 0;
+    padding: 0 20px 16px;
+  }
+
+  .pending {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 0 8px;
+  }
+
+  .pending:empty { display: none; }
+
+  .chip {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--separator);
+    background: var(--card-bg);
+    max-width: 140px;
+  }
+
+  .chip img {
+    display: block;
+    width: 140px;
+    height: 90px;
+    object-fit: cover;
+  }
+
+  .chip .file-row { padding: 8px 10px; min-width: 120px; }
+
+  .chip .remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .composer {
+    border: 1px solid var(--composer-border);
+    border-radius: 8px;
+    background: var(--composer-bg);
+    padding: 8px 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .composer:focus-within { border-color: var(--text-secondary); }
+
+  #message {
+    width: 100%;
+    resize: none;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.4;
+    max-height: 140px;
+    min-height: 24px;
+    padding: 4px 2px;
+  }
+
+  #message::placeholder { color: var(--text-secondary); }
+
+  .composer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .icon-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .icon-btn:hover { background: var(--hover); color: var(--text); }
+
+  #send {
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 4px;
+    border: 0;
+    background: var(--accent);
+    color: white;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  #send.active { opacity: 1; pointer-events: auto; }
+
+  #fileInput, #avatarInput { display: none; }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--modal-overlay);
+    display: none;
+    place-items: center;
+    z-index: 50;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open { display: grid; }
+
+  .modal {
+    width: min(400px, 100%);
+    background: var(--modal-bg);
+    border: 1px solid var(--separator);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .modal h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: var(--text-strong);
+  }
+
+  .modal-avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .modal-avatar-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(145deg, #e01e5a, #ecb22e);
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .modal-avatar-preview.green { background: linear-gradient(145deg, #2eb67d, #007a5a); }
+  .modal-avatar-preview.orange { background: linear-gradient(145deg, #ecb22e, #e01e5a); }
+  .modal-avatar-preview.blue { background: linear-gradient(145deg, #36c5f0, #1264a3); }
+  .modal-avatar-preview.purple { background: linear-gradient(145deg, #8e5cf7, #4a154b); }
+  .modal-avatar-preview.has-photo { color: transparent; font-size: 0; }
+
+  .modal-avatar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .modal label, .style-field > span {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .modal input[type="text"] {
+    width: 100%;
+    height: 36px;
+    border-radius: 6px;
+    border: 1px solid var(--separator);
+    background: var(--search-bg);
+    color: var(--text);
+    padding: 0 12px;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 14px;
+  }
+
+  .modal input[type="text"]:focus { border-color: var(--accent); }
+
+  .style-field { margin-bottom: 14px; }
+
+  .style-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 8px;
+    background: var(--segment-bg);
+    border: 1px solid var(--separator);
+  }
+
+  .style-switch.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .style-switch button {
+    appearance: none;
+    border: 0;
+    border-radius: 6px;
+    height: 32px;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .style-switch button.active {
+    background: var(--segment-active);
+    color: var(--text-strong);
+    box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.12);
+  }
+
+  .style-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-secondary);
+  }
+
+  .btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .btn {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 6px;
+    border: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn.ghost { background: transparent; color: var(--text-secondary); }
+  .btn.ghost:hover { background: var(--hover); color: var(--text); }
+  .btn.primary { background: var(--accent); color: white; }
+  .btn.secondary { background: var(--segment-bg); color: var(--text); }
+  .btn.secondary:hover { background: var(--hover); }
+
+  /* ——— WhatsApp skin ——— */
+  [data-skin="whatsapp"][data-theme="light"] {
+    --page-bg: #f0f2f5;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #111b21;
+    --sidebar-muted: #667781;
+    --sidebar-hover: #f5f6f6;
+    --sidebar-active: #f0f2f5;
+    --main-bg: #efeae2;
+    --header-bg: #f0f2f5;
+    --header-text: #111b21;
+    --header-icon: #54656f;
+    --wordmark: #00a884;
+    --text: #111b21;
+    --text-strong: #111b21;
+    --text-secondary: #667781;
+    --separator: #d1d7db;
+    --hover: rgba(11, 20, 26, 0.06);
+    --composer-border: transparent;
+    --composer-bg: #f0f2f5;
+    --input-bg: #ffffff;
+    --msg-hover: transparent;
+    --accent: #00a884;
+    --modal-bg: #ffffff;
+    --card-bg: #ffffff;
+    --search-bg: #ffffff;
+    --segment-bg: #f0f2f5;
+    --segment-active: #ffffff;
+    --wa-out: #d9fdd3;
+    --wa-in: #ffffff;
+    --pill-bg: #f0f2f5;
+    --pill-active-bg: #d9fdd3;
+    --pill-active-text: #008069;
+    --rail-bg: #111b21;
+    --rail-icon: #aebac1;
+    --rail-active: #ffffff;
+  }
+
+  [data-skin="whatsapp"][data-theme="dark"] {
+    --page-bg: #0b141a;
+    --sidebar-bg: #111b21;
+    --sidebar-text: #e9edef;
+    --sidebar-muted: #8696a0;
+    --sidebar-hover: #202c33;
+    --sidebar-active: #2a3942;
+    --main-bg: #0b141a;
+    --header-bg: #202c33;
+    --header-text: #e9edef;
+    --header-icon: #aebac1;
+    --wordmark: #06cf9c;
+    --text: #e9edef;
+    --text-strong: #e9edef;
+    --text-secondary: #8696a0;
+    --separator: #222d34;
+    --hover: rgba(255, 255, 255, 0.06);
+    --composer-border: transparent;
+    --composer-bg: #202c33;
+    --input-bg: #2a3942;
+    --msg-hover: transparent;
+    --accent: #00a884;
+    --modal-bg: #182229;
+    --card-bg: #202c33;
+    --search-bg: #202c33;
+    --segment-bg: #202c33;
+    --segment-active: #2a3942;
+    --wa-out: #005c4b;
+    --wa-in: #202c33;
+    --pill-bg: #202c33;
+    --pill-active-bg: #0a3b32;
+    --pill-active-text: #06cf9c;
+    --rail-bg: #111b21;
+    --rail-icon: #aebac1;
+    --rail-active: #ffffff;
+  }
+
+  [data-skin="whatsapp"] body {
+    font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  [data-skin="whatsapp"] .app { grid-template-columns: 60px 380px 1fr; }
+  [data-skin="whatsapp"] .rail { display: flex; }
+
+  [data-skin="whatsapp"] .sidebar { border-right: 1px solid var(--separator); }
+
+  [data-skin="whatsapp"] .workspace-bar { border-bottom: 1px solid var(--separator); }
+
+  [data-skin="whatsapp"] .workspace {
+    color: var(--wordmark);
+    font-weight: 800;
+    font-size: 21px;
+  }
+
+  [data-skin="whatsapp"] .workspace-menu { background: var(--modal-bg); color: var(--sidebar-text); }
+
+  [data-skin="whatsapp"] .workspace-extra { display: flex; }
+
+  [data-skin="whatsapp"] .sidebar-search-row {
+    padding: 8px 12px 10px;
+  }
+
+  [data-skin="whatsapp"] .sidebar-search-row input {
+    border-radius: 8px;
+    height: 36px;
+    background: var(--search-bg);
+    border: 1px solid var(--separator);
+    color: var(--sidebar-text);
+  }
+
+  [data-skin="whatsapp"] .section-label-row { display: none; }
+  [data-skin="whatsapp"] .filter-pills { display: flex; }
+
+  [data-skin="whatsapp"] .conv {
+    border-radius: 0;
+    padding: 10px 14px;
+    gap: 12px;
+    border-bottom: 1px solid var(--separator);
+    color: var(--sidebar-text);
+  }
+
+  [data-skin="whatsapp"] .conv.active { background: var(--sidebar-active); color: var(--sidebar-text); }
+  [data-skin="whatsapp"] .conv.active .conv-preview,
+  [data-skin="whatsapp"] .conv.active .conv-time { color: var(--sidebar-muted); }
+
+  [data-skin="whatsapp"] .conv-avatar,
+  [data-skin="whatsapp"] .header-avatar,
+  [data-skin="whatsapp"] .msg-avatar,
+  [data-skin="whatsapp"] .modal-avatar-preview {
+    border-radius: 50%;
+  }
+
+  [data-skin="whatsapp"] .conv-avatar { width: 44px; height: 44px; font-size: 17px; }
+  [data-skin="whatsapp"] .conv-time,
+  [data-skin="whatsapp"] .conv-preview { display: block; }
+  [data-skin="whatsapp"] .presence { display: none; }
+
+  [data-skin="whatsapp"] .chat-header {
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--separator);
+    height: 60px;
+  }
+
+  [data-skin="whatsapp"] .header-avatar { display: block; width: 40px; height: 40px; font-size: 15px; }
+  [data-skin="whatsapp"] .chat-person-sub { display: block; }
+
+  [data-skin="whatsapp"] .thread {
+    background:
+      linear-gradient(rgba(11, 20, 26, 0.04), rgba(11, 20, 26, 0.04)),
+      var(--main-bg);
+    padding: 12px 16px 8px;
+  }
+
+  [data-skin="whatsapp"][data-theme="dark"] .thread { background: var(--main-bg); }
+
+  [data-skin="whatsapp"] .day {
+    margin: 10px auto 14px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    padding: 5px 12px;
+    border-radius: 8px;
+    width: fit-content;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
+  }
+
+  [data-skin="whatsapp"] .day::before,
+  [data-skin="whatsapp"] .day::after { display: none; }
+
+  [data-skin="whatsapp"] .msg {
+    display: flex;
+    grid-template-columns: none;
+    gap: 0;
+    padding: 2px 0;
+    justify-content: flex-start;
+  }
+
+  [data-skin="whatsapp"] .msg.you { justify-content: flex-end; }
+  [data-skin="whatsapp"] .msg:hover { background: transparent; }
+  [data-skin="whatsapp"] .msg-avatar { display: none; }
+
+  [data-skin="whatsapp"] .msg-content {
+    max-width: min(78%, 520px);
+    background: var(--wa-in);
+    border-radius: 8px;
+    padding: 6px 8px 4px;
+    box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
+    position: relative;
+  }
+
+  [data-skin="whatsapp"] .msg.you .msg-content { background: var(--wa-out); border-top-right-radius: 0; }
+  [data-skin="whatsapp"] .msg.them .msg-content { border-top-left-radius: 0; }
+  [data-skin="whatsapp"] .msg-meta { display: none; }
+
+  [data-skin="whatsapp"] .msg-body {
+    font-size: 14.2px;
+    line-height: 1.4;
+    position: relative;
+    padding-right: 52px;
+    padding-bottom: 4px;
+    color: var(--text);
+  }
+
+  [data-skin="whatsapp"] .msg-body::after {
+    content: attr(data-time);
+    position: absolute;
+    right: 4px;
+    bottom: 0;
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  [data-skin="whatsapp"] .typing-row { padding: 4px 8px 8px; color: var(--text-secondary); }
+
+  [data-skin="whatsapp"] .composer-wrap { background: var(--composer-bg); padding: 8px 10px 10px; }
+
+  [data-skin="whatsapp"] .composer {
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  [data-skin="whatsapp"] .composer:focus-within { border-color: transparent; }
+
+  [data-skin="whatsapp"] #message {
+    background: var(--input-bg);
+    border-radius: 24px;
+    padding: 10px 14px;
+    font-size: 15px;
+    min-height: 42px;
+  }
+
+  [data-skin="whatsapp"] .composer-bar { display: contents; }
+
+  [data-skin="whatsapp"] .icon-btn {
+    order: -1;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    font-size: 22px;
+  }
+
+  [data-skin="whatsapp"] #send {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    padding: 0;
+    background: var(--accent);
+    font-size: 0;
+    position: relative;
+  }
+
+  [data-skin="whatsapp"] #send::before {
+    content: "➤";
+    font-size: 16px;
+    color: white;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  [data-skin="whatsapp"] .btn.primary { background: var(--accent); }
+
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr !important; }
+    .rail, .sidebar { display: none !important; }
+  }
+</style>
 </head>
 <body>
-  <div class="app" role="application" aria-label="Chat" id="appShell">
-    <aside class="sidebar">
-      <button type="button" class="workspace" id="skinToggle" title="Switch app look">
-        Workspace
-        <small id="skinHint">Click to switch to WhatsApp</small>
+<div class="app" role="application" aria-label="Chat" id="appShell">
+  <nav class="rail" id="navRail" aria-hidden="true">
+    <div class="rail-top">
+      <button type="button" class="rail-btn active" title="Chats">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       </button>
-      <div class="sidebar-search">
-        <input type="search" placeholder="Search" readonly tabindex="-1" />
-      </div>
-      <div class="section-label" id="sectionLabel">Direct messages</div>
-      <div class="conv-list">
-        <div class="conv active">
-          <div class="conv-avatar" id="sidebarAvatar">A</div>
-          <div class="conv-name" id="sidebarName">Alex</div>
-          <span class="presence" aria-hidden="true"></span>
-        </div>
-        <div class="conv">
-          <div class="conv-avatar green">S</div>
-          <div class="conv-name">Sam</div>
-        </div>
-        <div class="conv">
-          <div class="conv-avatar orange">J</div>
-          <div class="conv-name">Jordan</div>
-        </div>
-      </div>
-    </aside>
+      <button type="button" class="rail-btn" title="Status">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5" stroke-dasharray="3.6 3.2"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button type="button" class="rail-btn" title="Channels">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h1.2l3.8 4.2V6.8L6.2 11H5a2 2 0 0 0-2 2z"/><path d="M13.5 8.2a4 4 0 0 1 0 7.6"/><path d="M17 5.5a8 8 0 0 1 0 13"/></svg>
+      </button>
+      <button type="button" class="rail-btn" title="Communities">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1"/><circle cx="10" cy="7" r="3.2"/><path d="M22 20v-1a4 4 0 0 0-3-3.87"/><path d="M16 4.13a3.2 3.2 0 0 1 0 6.2"/></svg>
+      </button>
+      <button type="button" class="rail-btn" title="Meta AI">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z"/></svg>
+      </button>
+    </div>
+    <div class="rail-bottom">
+      <button type="button" class="rail-btn" title="Settings">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l1.9-1.4-2-3.4-2.2.9a8 8 0 0 0-1.7-1L15 4h-6l-.4 2.1a8 8 0 0 0-1.7 1l-2.2-.9-2 3.4L4.6 11a7.97 7.97 0 0 0 0 2l-1.9 1.4 2 3.4 2.2-.9a8 8 0 0 0 1.7 1L9 20h6l.4-2.1a8 8 0 0 0 1.7-1l2.2.9 2-3.4z"/></svg>
+      </button>
+      <div class="rail-avatar" id="railAvatar">Y</div>
+    </div>
+  </nav>
 
-    <section class="main">
-      <header class="chat-header">
-        <div class="chat-person" id="openContact" title="Edit profile" role="button" tabindex="0">
-          <div class="name" id="headerName">Alex</div>
-        </div>
-        <div class="header-actions">
-          <button type="button" id="skinToggleHeader" title="Switch app look" aria-label="Switch app look">⇄</button>
-          <button type="button" id="detailsBtn" title="Edit profile" aria-label="Edit profile">ⓘ</button>
-        </div>
-      </header>
-
-      <main class="thread" id="thread" aria-live="polite">
-        <div class="day">Today</div>
-      </main>
-
-      <div class="typing-row" id="typingRow" hidden></div>
-
-      <div class="composer-wrap">
-        <div class="pending" id="pending"></div>
-        <form class="composer" id="composer" autocomplete="off">
-          <textarea id="message" rows="1" placeholder="Message Alex"></textarea>
-          <div class="composer-bar">
-            <button class="icon-btn" type="button" id="attachBtn" title="Attach" aria-label="Attach file">+</button>
-            <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.doc,.docx,.md,.csv" />
-            <button id="send" type="submit">Send</button>
-          </div>
-        </form>
-      </div>
-    </section>
-  </div>
-
-  <div class="modal-backdrop" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
-    <div class="modal">
-      <h2 id="contactModalTitle">Edit profile</h2>
-      <div class="modal-avatar-row">
-        <div class="modal-avatar-preview" id="modalAvatar">A</div>
-        <div class="modal-avatar-actions">
-          <button type="button" class="btn secondary" id="changePhotoBtn">Choose photo…</button>
-          <button type="button" class="btn ghost" id="clearPhotoBtn">Use initial</button>
+  <aside class="sidebar">
+    <div class="workspace-bar">
+      <div class="workspace-wrap" id="workspaceWrap">
+        <button type="button" class="workspace" id="skinToggle" aria-haspopup="menu" aria-expanded="false">
+          <span id="workspaceLabel">Workspace</span>
+          <span class="workspace-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="workspace-menu" id="workspaceMenu" role="menu" hidden>
+          <button type="button" role="menuitem" data-skin="slack" id="menuSlack">Slack</button>
+          <button type="button" role="menuitem" data-skin="whatsapp" id="menuWhatsapp">WhatsApp</button>
         </div>
       </div>
-      <label for="contactNameInput">Display name</label>
-      <input type="text" id="contactNameInput" maxlength="40" placeholder="Display name" />
-      <div class="style-field">
-        <span>Appearance</span>
-        <div class="style-switch three" role="group" aria-label="Appearance">
-          <button type="button" id="appearanceLight" data-appearance="light">Light</button>
-          <button type="button" id="appearanceDark" data-appearance="dark">Dark</button>
-          <button type="button" id="appearanceAuto" data-appearance="auto" class="active">Auto</button>
-        </div>
-        <p class="style-hint" id="appearanceHint">Matches your system: light by day, dark at night.</p>
-      </div>
-      <div class="btn-row">
-        <button type="button" class="btn ghost" id="cancelContactBtn">Cancel</button>
-        <button type="button" class="btn primary" id="saveContactBtn">Save</button>
+      <div class="workspace-extra">
+        <button type="button" id="addChatBtn" title="New chat" aria-label="New chat">+</button>
+        <button type="button" id="moreMenuBtn" title="Menu" aria-label="Menu">⋮</button>
       </div>
     </div>
+
+    <div class="sidebar-search-row">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input type="text" id="convSearch" placeholder="Search" />
+    </div>
+
+    <div class="section-label-row" id="sectionLabelRow">
+      <div class="section-label">Direct messages</div>
+      <button type="button" class="add-dm-btn" id="addDmBtn" title="Add person" aria-label="Add person">+</button>
+    </div>
+
+    <div class="filter-pills" id="filterPills">
+      <button type="button" class="pill active" data-filter="all">All</button>
+      <button type="button" class="pill" data-filter="unread">Unread</button>
+      <button type="button" class="pill" data-filter="favorites">Favorites</button>
+      <button type="button" class="pill" data-filter="groups">Groups</button>
+    </div>
+
+    <div class="conv-list" id="convList"></div>
+  </aside>
+
+  <section class="main">
+    <header class="chat-header">
+      <div class="chat-person" id="openContact" title="Edit profile" role="button" tabindex="0">
+        <div class="conv-avatar header-avatar" id="headerAvatar"></div>
+        <div class="chat-person-text">
+          <div class="name" id="headerName">Suchen</div>
+          <div class="chat-person-sub">online</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="detailsBtn" title="Edit profile" aria-label="Edit profile">ⓘ</button>
+      </div>
+    </header>
+
+    <main class="thread" id="thread" aria-live="polite"></main>
+
+    <div class="typing-row" id="typingRow" hidden></div>
+
+    <div class="composer-wrap">
+      <div class="pending" id="pending"></div>
+      <form class="composer" id="composer" autocomplete="off">
+        <textarea id="message" rows="1" placeholder="Message"></textarea>
+        <div class="composer-bar">
+          <button class="icon-btn" type="button" id="attachBtn" title="Attach" aria-label="Attach file">+</button>
+          <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.doc,.docx,.md,.csv" />
+          <button id="send" type="submit">Send</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<div class="modal-backdrop" id="personModal" role="dialog" aria-modal="true" aria-labelledby="personModalTitle">
+  <div class="modal">
+    <h2 id="personModalTitle">Edit profile</h2>
+    <div class="modal-avatar-row">
+      <div class="modal-avatar-preview" id="modalAvatar">?</div>
+      <div class="modal-avatar-actions">
+        <button type="button" class="btn secondary" id="changePhotoBtn">Choose photo…</button>
+        <button type="button" class="btn ghost" id="clearPhotoBtn">Use initial</button>
+      </div>
+    </div>
+    <label for="contactNameInput">Display name</label>
+    <input type="text" id="contactNameInput" maxlength="40" placeholder="Display name" />
+    <div class="style-field" id="appearanceSection">
+      <span>Appearance</span>
+      <div class="style-switch three" role="group" aria-label="Appearance">
+        <button type="button" id="appearanceLight" data-appearance="light">Light</button>
+        <button type="button" id="appearanceDark" data-appearance="dark">Dark</button>
+        <button type="button" id="appearanceAuto" data-appearance="auto" class="active">Auto</button>
+      </div>
+      <p class="style-hint" id="appearanceHint">Matches your system: light by day, dark at night.</p>
+    </div>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="deleteContactBtn" hidden>Delete</button>
+      <span style="flex:1"></span>
+      <button type="button" class="btn ghost" id="cancelContactBtn">Cancel</button>
+      <button type="button" class="btn primary" id="saveContactBtn">Save</button>
+    </div>
   </div>
-  <input type="file" id="avatarInput" accept="image/*" />
+</div>
+<input type="file" id="avatarInput" accept="image/*" />
 
-  <script>
-    const thread = document.getElementById("thread");
-    const form = document.getElementById("composer");
-    const input = document.getElementById("message");
-    const sendBtn = document.getElementById("send");
-    const attachBtn = document.getElementById("attachBtn");
-    const fileInput = document.getElementById("fileInput");
-    const pendingEl = document.getElementById("pending");
-    const contactModal = document.getElementById("contactModal");
-    const contactNameInput = document.getElementById("contactNameInput");
-    const modalAvatar = document.getElementById("modalAvatar");
-    const avatarInput = document.getElementById("avatarInput");
-    const typingRow = document.getElementById("typingRow");
+<script>
+  const thread = document.getElementById("thread");
+  const form = document.getElementById("composer");
+  const input = document.getElementById("message");
+  const sendBtn = document.getElementById("send");
+  const attachBtn = document.getElementById("attachBtn");
+  const fileInput = document.getElementById("fileInput");
+  const pendingEl = document.getElementById("pending");
+  const personModal = document.getElementById("personModal");
+  const personModalTitle = document.getElementById("personModalTitle");
+  const nameInput = document.getElementById("contactNameInput");
+  const modalAvatar = document.getElementById("modalAvatar");
+  const avatarInput = document.getElementById("avatarInput");
+  const typingRow = document.getElementById("typingRow");
+  const convList = document.getElementById("convList");
+  const searchInput = document.getElementById("convSearch");
+  const appearanceSection = document.getElementById("appearanceSection");
+  const deleteBtn = document.getElementById("deleteContactBtn");
 
-    const STORAGE_KEY = "messages-chat-contact";
-    const DEFAULT_CONTACT = { name: "Alex", avatarDataUrl: null, appearance: "auto", skin: "slack" };
-    const APPEARANCE_HINTS = {
-      light: "Always use light mode.",
-      dark: "Always use dark mode.",
-      auto: "Matches your system: light by day, dark at night."
-    };
+  const STORAGE_KEY = "messages-chat-contact";
+  const ACCENTS = ["pink", "green", "orange", "blue", "purple"];
+  const APPEARANCE_HINTS = {
+    light: "Always use light mode.",
+    dark: "Always use dark mode.",
+    auto: "Matches your system: light by day, dark at night."
+  };
 
-    let contact = loadContact();
-    let draftAvatar = contact.avatarDataUrl;
-    let draftAppearance = contact.appearance || "auto";
-    let mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  function uid() {
+    return "p" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
+  }
 
-    const pendingFiles = [];
-    const history = [
-      { role: "assistant", content: "Hey — you free for a sec?", images: [] },
-      { role: "assistant", content: "Need a quick take on something.", images: [] }
+  function accentClass(accent) { return accent === "pink" ? "" : accent; }
+
+  function seedThreads(people) {
+    const threads = {};
+    threads[people[0].id] = [
+      { role: "assistant", content: "Hey — you free for a sec?", images: [], time: "9:14 AM" },
+      { role: "assistant", content: "Need a quick take on something.", images: [], time: "9:14 AM" }
     ];
-    let busy = false;
+    if (people[1]) {
+      threads[people[1].id] = [
+        { role: "assistant", content: "Sounds good, see you then!", images: [], time: "Yesterday" }
+      ];
+    }
+    if (people[2]) {
+      threads[people[2].id] = [
+        { role: "assistant", content: "Just sent the files over — let me know if anything's missing.", images: [], time: "Yesterday" }
+      ];
+    }
+    return threads;
+  }
 
-    function loadContact() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return { ...DEFAULT_CONTACT };
-        const parsed = JSON.parse(raw);
-        const appearance = ["light", "dark", "auto"].includes(parsed.appearance)
-          ? parsed.appearance
-          : "auto";
-        const skin = parsed.skin === "whatsapp" ? "whatsapp" : "slack";
-        return {
-          name: (parsed.name || DEFAULT_CONTACT.name).trim() || DEFAULT_CONTACT.name,
-          avatarDataUrl: parsed.avatarDataUrl || null,
-          appearance,
-          skin
-        };
-      } catch {
-        return { ...DEFAULT_CONTACT };
-      }
+  function loadState() {
+    let parsed = null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) parsed = JSON.parse(raw);
+    } catch {
+      parsed = null;
     }
 
-    function resolvedTheme(appearance) {
-      if (appearance === "light" || appearance === "dark") return appearance;
-      return mediaQuery.matches ? "dark" : "light";
+    const appearance = parsed && ["light", "dark", "auto"].includes(parsed.appearance) ? parsed.appearance : "auto";
+    const skin = parsed && parsed.skin === "whatsapp" ? "whatsapp" : "slack";
+
+    if (parsed && Array.isArray(parsed.people) && parsed.people.length) {
+      const people = parsed.people.map((p, i) => ({
+        id: p && p.id ? String(p.id) : uid(),
+        name: (p && p.name ? String(p.name).trim() : "") || `Person ${i + 1}`,
+        avatarDataUrl: (p && p.avatarDataUrl) || null,
+        accent: (p && ACCENTS.includes(p.accent)) ? p.accent : ACCENTS[i % ACCENTS.length]
+      }));
+      const threads = (parsed.threads && typeof parsed.threads === "object") ? parsed.threads : {};
+      people.forEach((p) => { if (!Array.isArray(threads[p.id])) threads[p.id] = []; });
+      const activeId = people.some((p) => p.id === parsed.activeId) ? parsed.activeId : people[0].id;
+      return { skin, appearance, activeId, people, threads };
     }
 
-    function applySkin() {
-      const skin = contact.skin === "whatsapp" ? "whatsapp" : "slack";
-      document.documentElement.setAttribute("data-skin", skin);
-      const toggle = document.getElementById("skinToggle");
-      const section = document.getElementById("sectionLabel");
-      const headerBtn = document.getElementById("skinToggleHeader");
-      if (skin === "whatsapp") {
-        toggle.innerHTML = `WhatsApp<small id="skinHint">Click to switch to Slack</small>`;
-        section.textContent = "Chats";
-        headerBtn.title = "Switch to Slack";
-        document.querySelector(".app").setAttribute("aria-label", "WhatsApp");
-      } else {
-        toggle.innerHTML = `Workspace<small id="skinHint">Click to switch to WhatsApp</small>`;
-        section.textContent = "Direct messages";
-        headerBtn.title = "Switch to WhatsApp";
-        document.querySelector(".app").setAttribute("aria-label", "Slack");
-      }
+    // Migrate legacy single-contact shape (or fresh install).
+    const firstName = (parsed && typeof parsed.name === "string" && parsed.name.trim()) || "Suchen";
+    const firstAvatar = (parsed && parsed.avatarDataUrl) || null;
+    const people = [
+      { id: uid(), name: firstName, avatarDataUrl: firstAvatar, accent: ACCENTS[0] },
+      { id: uid(), name: "Sam", avatarDataUrl: null, accent: ACCENTS[1] },
+      { id: uid(), name: "Jordan", avatarDataUrl: null, accent: ACCENTS[2] }
+    ];
+    const threads = seedThreads(people);
+    return { skin, appearance, activeId: people[0].id, people, threads };
+  }
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  }
+
+  let state = loadState();
+  saveState();
+
+  let draftAvatar = null;
+  let draftAccent = ACCENTS[0];
+  let draftAppearance = state.appearance;
+  let modalMode = "edit";
+  let editingPersonId = null;
+  let mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  let busy = false;
+  const pendingFiles = [];
+
+  function getActivePerson() {
+    return state.people.find((p) => p.id === state.activeId) || state.people[0];
+  }
+
+  function resolvedTheme(appearance) {
+    if (appearance === "light" || appearance === "dark") return appearance;
+    return mediaQuery.matches ? "dark" : "light";
+  }
+
+  function initialFor(name) {
+    return ((name || "?").trim()[0] || "?").toUpperCase();
+  }
+
+  function paintAvatar(el, name, avatarDataUrl) {
+    if (avatarDataUrl) {
+      el.classList.add("has-photo");
+      el.style.backgroundImage = `url("${avatarDataUrl}")`;
+      el.textContent = "";
+    } else {
+      el.classList.remove("has-photo");
+      el.style.backgroundImage = "";
+      el.textContent = initialFor(name);
     }
+  }
 
-    function applyTheme() {
-      document.documentElement.setAttribute("data-theme", resolvedTheme(contact.appearance || "auto"));
-      applySkin();
+  function formatTime(date = new Date()) {
+    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }
+
+  function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+  function applySkin() {
+    document.documentElement.setAttribute("data-skin", state.skin);
+    const isWa = state.skin === "whatsapp";
+    document.getElementById("workspaceLabel").textContent = isWa ? "WhatsApp" : "Workspace";
+    document.getElementById("menuSlack").classList.toggle("active", !isWa);
+    document.getElementById("menuWhatsapp").classList.toggle("active", isWa);
+    document.getElementById("sectionLabelRow").hidden = false;
+    searchInput.placeholder = isWa ? "Search or start a new chat" : "Search";
+    document.querySelector(".app").setAttribute("aria-label", isWa ? "WhatsApp" : "Slack");
+    renderConvList();
+    renderActiveHeader();
+  }
+
+  function applyTheme() {
+    document.documentElement.setAttribute("data-theme", resolvedTheme(state.appearance));
+    applySkin();
+  }
+
+  function setSkin(skin) {
+    if (state.skin === skin) return;
+    state.skin = skin;
+    saveState();
+    applyTheme();
+  }
+
+  const workspaceWrap = document.getElementById("workspaceWrap");
+  const workspaceMenu = document.getElementById("workspaceMenu");
+  const skinToggle = document.getElementById("skinToggle");
+
+  function openWorkspaceMenu() {
+    workspaceWrap.classList.add("open");
+    workspaceMenu.hidden = false;
+    skinToggle.setAttribute("aria-expanded", "true");
+  }
+
+  function closeWorkspaceMenu() {
+    workspaceWrap.classList.remove("open");
+    workspaceMenu.hidden = true;
+    skinToggle.setAttribute("aria-expanded", "false");
+  }
+
+  skinToggle.addEventListener("click", () => {
+    if (workspaceWrap.classList.contains("open")) closeWorkspaceMenu();
+    else openWorkspaceMenu();
+  });
+
+  document.getElementById("menuSlack").addEventListener("click", () => { setSkin("slack"); closeWorkspaceMenu(); });
+  document.getElementById("menuWhatsapp").addEventListener("click", () => { setSkin("whatsapp"); closeWorkspaceMenu(); });
+
+  document.addEventListener("click", (e) => {
+    if (!workspaceWrap.contains(e.target)) closeWorkspaceMenu();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeWorkspaceMenu();
+  });
+
+  const onSchemeChange = () => { if (state.appearance === "auto") applyTheme(); };
+  if (mediaQuery.addEventListener) mediaQuery.addEventListener("change", onSchemeChange);
+  else mediaQuery.addListener(onSchemeChange);
+
+  function lastEntryOf(personId) {
+    const entries = state.threads[personId] || [];
+    return entries[entries.length - 1] || null;
+  }
+
+  function previewFor(personId) {
+    const entry = lastEntryOf(personId);
+    if (!entry) return "No messages yet";
+    let text;
+    if (entry.role === "user") {
+      text = entry.content || (entry.attachments && entry.attachments.length ? "Sent an attachment" : "");
+    } else if (Array.isArray(entry.bubbles) && entry.bubbles.length) {
+      text = entry.bubbles[entry.bubbles.length - 1];
+    } else {
+      text = entry.content;
     }
+    text = (text || "").replace(/\s+/g, " ").trim();
+    if (!text) return "No messages yet";
+    return text.length > 42 ? text.slice(0, 42) + "…" : text;
+  }
 
-    function saveContact(next) {
-      contact = next;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(contact));
-      applyContact();
-      applyTheme();
-    }
+  function timeFor(personId) {
+    const entry = lastEntryOf(personId);
+    return entry ? entry.time || "" : "";
+  }
 
-    function toggleSkin() {
-      const nextSkin = contact.skin === "whatsapp" ? "slack" : "whatsapp";
-      saveContact({ ...contact, skin: nextSkin });
-    }
+  function renderConvList() {
+    const q = searchInput.value.trim().toLowerCase();
+    convList.innerHTML = "";
+    state.people
+      .filter((p) => !q || p.name.toLowerCase().includes(q))
+      .forEach((p) => {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "conv" + (p.id === state.activeId ? " active" : "");
+        row.dataset.id = p.id;
 
-    document.getElementById("skinToggle").addEventListener("click", toggleSkin);
-    document.getElementById("skinToggleHeader").addEventListener("click", toggleSkin);
+        const avatar = document.createElement("div");
+        avatar.className = "conv-avatar " + (p.avatarDataUrl ? "" : accentClass(p.accent));
+        paintAvatar(avatar, p.name, p.avatarDataUrl);
 
-    function setAppearanceButtons(appearance) {
-      draftAppearance = ["light", "dark", "auto"].includes(appearance) ? appearance : "auto";
-      document.getElementById("appearanceLight").classList.toggle("active", draftAppearance === "light");
-      document.getElementById("appearanceDark").classList.toggle("active", draftAppearance === "dark");
-      document.getElementById("appearanceAuto").classList.toggle("active", draftAppearance === "auto");
-      document.getElementById("appearanceHint").textContent = APPEARANCE_HINTS[draftAppearance];
-    }
+        const meta = document.createElement("div");
+        meta.className = "conv-meta";
 
-    function initialFor(name) {
-      return ((name || "?").trim()[0] || "?").toUpperCase();
-    }
+        const topRow = document.createElement("div");
+        topRow.className = "conv-top-row";
+        const nameEl = document.createElement("span");
+        nameEl.className = "conv-name";
+        nameEl.textContent = p.name;
+        const timeEl = document.createElement("span");
+        timeEl.className = "conv-time";
+        timeEl.textContent = timeFor(p.id);
+        topRow.append(nameEl, timeEl);
 
-    function paintAvatar(el, name, avatarDataUrl) {
-      if (avatarDataUrl) {
-        el.classList.add("has-photo");
-        el.style.backgroundImage = `url("${avatarDataUrl}")`;
-        el.textContent = "";
-      } else {
-        el.classList.remove("has-photo");
-        el.style.backgroundImage = "";
-        el.textContent = initialFor(name);
-      }
-    }
+        const previewEl = document.createElement("div");
+        previewEl.className = "conv-preview";
+        previewEl.textContent = previewFor(p.id);
 
-    function formatTime(date = new Date()) {
-      return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    }
+        meta.append(topRow, previewEl);
 
-    function applyContact() {
-      document.getElementById("sidebarName").textContent = contact.name;
-      document.getElementById("headerName").textContent = contact.name;
-      paintAvatar(document.getElementById("sidebarAvatar"), contact.name, contact.avatarDataUrl);
-      paintAvatar(modalAvatar, contact.name, contact.avatarDataUrl);
-      document.title = contact.name;
-      input.placeholder = `Message ${contact.name}`;
-      document.querySelectorAll(".msg.them .msg-author").forEach((el) => {
-        el.textContent = contact.name;
+        const presence = document.createElement("span");
+        presence.className = "presence";
+
+        row.append(avatar, meta, presence);
+        row.addEventListener("click", () => switchActive(p.id));
+        convList.appendChild(row);
       });
-      document.querySelectorAll(".msg.them .msg-avatar").forEach((el) => {
-        paintAvatar(el, contact.name, contact.avatarDataUrl);
-      });
-    }
+  }
 
-    function openContactModal() {
-      contactNameInput.value = contact.name;
-      draftAvatar = contact.avatarDataUrl;
-      setAppearanceButtons(contact.appearance || "auto");
-      paintAvatar(modalAvatar, contact.name, draftAvatar);
-      contactModal.classList.add("open");
-      contactNameInput.focus();
-      contactNameInput.select();
-    }
+  function renderActiveHeader() {
+    const p = getActivePerson();
+    if (!p) return;
+    document.getElementById("headerName").textContent = p.name;
+    const headerAvatar = document.getElementById("headerAvatar");
+    headerAvatar.className = "conv-avatar header-avatar " + (p.avatarDataUrl ? "" : accentClass(p.accent));
+    paintAvatar(headerAvatar, p.name, p.avatarDataUrl);
+    input.placeholder = state.skin === "whatsapp" ? "Type a message" : `Message ${p.name}`;
+    document.title = p.name;
+  }
 
-    function closeContactModal() {
-      contactModal.classList.remove("open");
-      draftAvatar = contact.avatarDataUrl;
-      draftAppearance = contact.appearance || "auto";
-    }
+  function formatBytes(n) {
+    if (n < 1024) return n + " B";
+    if (n < 1024 * 1024) return (n / 1024).toFixed(0) + " KB";
+    return (n / (1024 * 1024)).toFixed(1) + " MB";
+  }
 
-    document.getElementById("openContact").addEventListener("click", openContactModal);
-    document.getElementById("openContact").addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openContactModal();
-      }
-    });
-    document.getElementById("detailsBtn").addEventListener("click", openContactModal);
-    document.getElementById("cancelContactBtn").addEventListener("click", closeContactModal);
-    contactModal.addEventListener("click", (e) => {
-      if (e.target === contactModal) closeContactModal();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && contactModal.classList.contains("open")) closeContactModal();
-    });
+  function extLabel(name) {
+    return ((name.split(".").pop() || "FILE").toUpperCase()).slice(0, 4);
+  }
 
-    document.getElementById("appearanceLight").addEventListener("click", () => setAppearanceButtons("light"));
-    document.getElementById("appearanceDark").addEventListener("click", () => setAppearanceButtons("dark"));
-    document.getElementById("appearanceAuto").addEventListener("click", () => setAppearanceButtons("auto"));
-
-    document.getElementById("changePhotoBtn").addEventListener("click", () => avatarInput.click());
-    document.getElementById("clearPhotoBtn").addEventListener("click", () => {
-      draftAvatar = null;
-      paintAvatar(modalAvatar, contactNameInput.value || contact.name, null);
-    });
-
-    contactNameInput.addEventListener("input", () => {
-      if (!draftAvatar) paintAvatar(modalAvatar, contactNameInput.value || "?", null);
-    });
-
-    avatarInput.addEventListener("change", () => {
-      const file = avatarInput.files?.[0];
-      if (!file) return;
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => {
-        draftAvatar = reader.result;
-        paintAvatar(modalAvatar, contactNameInput.value || contact.name, draftAvatar);
-      };
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
       reader.readAsDataURL(file);
-      avatarInput.value = "";
     });
+  }
 
-    document.getElementById("saveContactBtn").addEventListener("click", () => {
-      const name = contactNameInput.value.trim() || DEFAULT_CONTACT.name;
-      saveContact({
-        name,
-        avatarDataUrl: draftAvatar,
-        appearance: draftAppearance,
-        skin: contact.skin || "slack"
-      });
-      closeContactModal();
-    });
+  function resizeInput() {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 140) + "px";
+    const canSend = (input.value.trim().length > 0 || pendingFiles.length > 0) && !busy;
+    sendBtn.classList.toggle("active", canSend);
+  }
 
-    const onSchemeChange = () => {
-      if ((contact.appearance || "auto") === "auto") applyTheme();
-    };
-    if (mediaQuery.addEventListener) mediaQuery.addEventListener("change", onSchemeChange);
-    else mediaQuery.addListener(onSchemeChange);
-
-    function formatBytes(n) {
-      if (n < 1024) return n + " B";
-      if (n < 1024 * 1024) return (n / 1024).toFixed(0) + " KB";
-      return (n / (1024 * 1024)).toFixed(1) + " MB";
-    }
-
-    function extLabel(name) {
-      return ((name.split(".").pop() || "FILE").toUpperCase()).slice(0, 4);
-    }
-
-    function fileToDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function resizeInput() {
-      input.style.height = "auto";
-      input.style.height = Math.min(input.scrollHeight, 140) + "px";
-      const canSend = (input.value.trim().length > 0 || pendingFiles.length > 0) && !busy;
-      sendBtn.classList.toggle("active", canSend);
-    }
-
-    function renderPending() {
-      pendingEl.innerHTML = "";
-      pendingFiles.forEach((item, index) => {
-        const chip = document.createElement("div");
-        chip.className = "chip";
-        if (item.kind === "image") {
-          chip.innerHTML = `<img src="${item.url}" alt="" /><button class="remove" type="button" data-i="${index}" aria-label="Remove">×</button>`;
-        } else {
-          const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "";
-          chip.innerHTML = `
-            <div class="file-row">
-              <div class="file-icon ${klass}">${extLabel(item.name)}</div>
-              <div>
-                <div class="file-name">${item.name}</div>
-                <div class="file-size">${formatBytes(item.size)}</div>
-              </div>
-            </div>
-            <button class="remove" type="button" data-i="${index}" aria-label="Remove">×</button>`;
-        }
-        pendingEl.appendChild(chip);
-      });
-      pendingEl.querySelectorAll(".remove").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const i = Number(btn.dataset.i);
-          const removed = pendingFiles.splice(i, 1)[0];
-          if (removed?.url) URL.revokeObjectURL(removed.url);
-          renderPending();
-          resizeInput();
-        });
-      });
-      resizeInput();
-    }
-
-    function appendMessage({ side, text, attachments = [] }) {
-      const row = document.createElement("div");
-      row.className = `msg ${side === "out" ? "you" : "them"}`;
-
-      const avatar = document.createElement("div");
-      avatar.className = `msg-avatar ${side === "out" ? "you" : ""}`;
-      if (side === "out") {
-        avatar.textContent = "Y";
+  function renderPending() {
+    pendingEl.innerHTML = "";
+    pendingFiles.forEach((item, index) => {
+      const chip = document.createElement("div");
+      chip.className = "chip";
+      if (item.kind === "image") {
+        chip.innerHTML = `<img src="${item.url}" alt="" /><button class="remove" type="button" data-i="${index}" aria-label="Remove">×</button>`;
       } else {
-        paintAvatar(avatar, contact.name, contact.avatarDataUrl);
+        const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "";
+        chip.innerHTML = `
+          <div class="file-row">
+            <div class="file-icon ${klass}">${extLabel(item.name)}</div>
+            <div>
+              <div class="file-name">${item.name}</div>
+              <div class="file-size">${formatBytes(item.size)}</div>
+            </div>
+          </div>
+          <button class="remove" type="button" data-i="${index}" aria-label="Remove">×</button>`;
       }
-
-      const content = document.createElement("div");
-      content.className = "msg-content";
-      const meta = document.createElement("div");
-      meta.className = "msg-meta";
-      meta.innerHTML = `
-        <span class="msg-author ${side === "out" ? "you" : ""}">${side === "out" ? "You" : contact.name}</span>
-        <span class="msg-time">${formatTime()}</span>`;
-
-      const body = document.createElement("div");
-      body.className = "msg-body";
-      body.dataset.time = formatTime();
-      if (text) body.textContent = text;
-
-      attachments.forEach((item) => {
-        const card = document.createElement("div");
-        card.className = "attach-card";
-        if (item.kind === "image") {
-          card.innerHTML = `<img src="${item.url}" alt="${item.name}" />`;
-        } else {
-          const klass = item.name.toLowerCase().endsWith(".pdf") ? "pdf" : "";
-          card.innerHTML = `
-            <div class="file-row">
-              <div class="file-icon ${klass}">${extLabel(item.name)}</div>
-              <div>
-                <div class="file-name">${item.name}</div>
-                <div class="file-size">${formatBytes(item.size)}</div>
-              </div>
-            </div>`;
-        }
-        body.appendChild(card);
+      pendingEl.appendChild(chip);
+    });
+    pendingEl.querySelectorAll(".remove").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.dataset.i);
+        const removed = pendingFiles.splice(i, 1)[0];
+        if (removed && removed.url && removed.kind === "image" && removed.url.startsWith("blob:")) URL.revokeObjectURL(removed.url);
+        renderPending();
+        resizeInput();
       });
+    });
+    resizeInput();
+  }
 
-      content.appendChild(meta);
-      content.appendChild(body);
-      row.appendChild(avatar);
-      row.appendChild(content);
-      thread.appendChild(row);
-      thread.scrollTop = thread.scrollHeight;
+  function appendMessage({ side, text, time, attachments = [] }) {
+    const active = getActivePerson();
+    const row = document.createElement("div");
+    row.className = `msg ${side === "out" ? "you" : "them"}`;
+
+    const avatar = document.createElement("div");
+    avatar.className = `msg-avatar ${side === "out" ? "you" : accentClass(active.accent)}`;
+    if (side === "out") {
+      avatar.textContent = "Y";
+    } else {
+      paintAvatar(avatar, active.name, active.avatarDataUrl);
     }
 
-    function showTyping() {
-      typingRow.hidden = false;
-      typingRow.innerHTML = `${contact.name} is typing <span class="dots"><span></span><span></span><span></span></span>`;
-    }
+    const content = document.createElement("div");
+    content.className = "msg-content";
+    const meta = document.createElement("div");
+    meta.className = "msg-meta";
+    const displayTime = time || formatTime();
+    meta.innerHTML = `
+      <span class="msg-author ${side === "out" ? "you" : ""}">${side === "out" ? "You" : active.name}</span>
+      <span class="msg-time"></span>`;
+    meta.querySelector(".msg-time").textContent = displayTime;
 
-    function hideTyping() {
-      typingRow.hidden = true;
-      typingRow.textContent = "";
-    }
+    const body = document.createElement("div");
+    body.className = "msg-body";
+    body.dataset.time = displayTime;
+    if (text) body.textContent = text;
 
-    async function prepareAttachments(attachments) {
-      const images = [];
-      const notes = [];
-      for (const item of attachments) {
-        if (item.kind === "image" && item.file) {
-          const dataUrl = await fileToDataUrl(item.file);
-          images.push(dataUrl);
-          item.url = dataUrl;
-        } else if (item.file) {
-          const formData = new FormData();
-          formData.append("file", item.file);
-          try {
-            const res = await fetch("/api/extract-text", { method: "POST", body: formData });
-            if (res.ok) {
-              const data = await res.json();
-              notes.push(`Attached file "${data.name}":\n${data.text}`);
-            } else {
-              notes.push(`Attached file "${item.name}" (could not read contents).`);
-            }
-          } catch {
+    attachments.forEach((item) => {
+      const card = document.createElement("div");
+      card.className = "attach-card";
+      if (item.kind === "image" && item.url) {
+        const img = document.createElement("img");
+        img.src = item.url;
+        img.alt = item.name || "";
+        card.appendChild(img);
+      } else {
+        const klass = (item.name || "").toLowerCase().endsWith(".pdf") ? "pdf" : "";
+        card.innerHTML = `
+          <div class="file-row">
+            <div class="file-icon ${klass}">${extLabel(item.name || "file")}</div>
+            <div>
+              <div class="file-name">${item.name || "file"}</div>
+              <div class="file-size">${formatBytes(item.size || 0)}</div>
+            </div>
+          </div>`;
+      }
+      body.appendChild(card);
+    });
+
+    content.appendChild(meta);
+    content.appendChild(body);
+    row.appendChild(avatar);
+    row.appendChild(content);
+    thread.appendChild(row);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function renderThreadFor(personId) {
+    thread.innerHTML = "";
+    const day = document.createElement("div");
+    day.className = "day";
+    day.textContent = "Today";
+    thread.appendChild(day);
+
+    const entries = state.threads[personId] || [];
+    entries.forEach((entry) => {
+      if (entry.role === "user") {
+        appendMessage({ side: "out", text: entry.content, time: entry.time, attachments: entry.attachments || [] });
+      } else if (Array.isArray(entry.bubbles) && entry.bubbles.length) {
+        entry.bubbles.forEach((b) => appendMessage({ side: "in", text: b, time: entry.time }));
+      } else {
+        appendMessage({ side: "in", text: entry.content, time: entry.time });
+      }
+    });
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function pushEntry(personId, entry) {
+    if (!Array.isArray(state.threads[personId])) state.threads[personId] = [];
+    state.threads[personId].push(entry);
+    saveState();
+  }
+
+  function switchActive(id) {
+    if (id === state.activeId) return;
+    state.activeId = id;
+    hideTyping();
+    pendingFiles.length = 0;
+    renderPending();
+    input.value = "";
+    saveState();
+    renderConvList();
+    renderActiveHeader();
+    renderThreadFor(id);
+    resizeInput();
+  }
+
+  function showTyping() {
+    const active = getActivePerson();
+    typingRow.hidden = false;
+    typingRow.innerHTML = `${active.name} is typing <span class="dots"><span></span><span></span><span></span></span>`;
+  }
+
+  function hideTyping() {
+    typingRow.hidden = true;
+    typingRow.textContent = "";
+  }
+
+  async function prepareAttachments(attachments) {
+    const images = [];
+    const notes = [];
+    for (const item of attachments) {
+      if (item.kind === "image" && item.file) {
+        const dataUrl = await fileToDataUrl(item.file);
+        images.push(dataUrl);
+        item.url = dataUrl;
+      } else if (item.file) {
+        const formData = new FormData();
+        formData.append("file", item.file);
+        try {
+          const res = await fetch("/api/extract-text", { method: "POST", body: formData });
+          if (res.ok) {
+            const data = await res.json();
+            notes.push(`Attached file "${data.name}":\n${data.text}`);
+          } else {
             notes.push(`Attached file "${item.name}" (could not read contents).`);
           }
+        } catch {
+          notes.push(`Attached file "${item.name}" (could not read contents).`);
         }
       }
-      return { images, notes };
     }
+    return { images, notes };
+  }
 
-    async function askModel() {
-      showTyping();
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contact_name: contact.name,
-            messages: history
-          })
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.detail || "Request failed");
+  async function askModel(personId) {
+    const isActive = () => state.activeId === personId;
+    const person = state.people.find((p) => p.id === personId);
+    if (isActive()) showTyping();
+    try {
+      const apiMessages = (state.threads[personId] || []).map((m) => ({
+        role: m.role,
+        content: m.content,
+        images: m.images || []
+      }));
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contact_name: (person && person.name) || "Assistant",
+          messages: apiMessages
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || "Request failed");
 
-        const parts = Array.isArray(data.replies) && data.replies.length
-          ? data.replies.map((p) => String(p || "").trim()).filter(Boolean)
-          : [((data.reply || "").trim() || "hmm")];
+      const parts = Array.isArray(data.replies) && data.replies.length
+        ? data.replies.map((p) => String(p || "").trim()).filter(Boolean)
+        : [((data.reply || "").trim() || "hmm")];
 
-        const full = parts.join("\n\n");
-        history.push({ role: "assistant", content: full, images: [] });
+      const full = parts.join("\n\n");
+      const time = formatTime();
+      pushEntry(personId, { role: "assistant", content: full, images: [], time, bubbles: parts });
+      renderConvList();
 
-        for (let i = 0; i < parts.length; i += 1) {
-          if (i > 0) {
-            showTyping();
-            await new Promise((r) => setTimeout(r, 700 + Math.random() * 900));
-          }
+      for (let i = 0; i < parts.length; i += 1) {
+        if (i > 0) {
+          if (isActive()) showTyping();
+          await sleep(700 + Math.random() * 900);
+        }
+        if (isActive()) {
           hideTyping();
-          appendMessage({ side: "in", text: parts[i] });
-          if (i < parts.length - 1) {
-            await new Promise((r) => setTimeout(r, 250 + Math.random() * 350));
-          }
+          appendMessage({ side: "in", text: parts[i], time });
         }
-      } catch (err) {
-        hideTyping();
-        appendMessage({ side: "in", text: "Couldn't send — try again in a sec." });
-        console.error(err);
+        if (i < parts.length - 1) await sleep(250 + Math.random() * 350);
       }
+    } catch (err) {
+      if (isActive()) {
+        hideTyping();
+        appendMessage({ side: "in", text: "Couldn't send — try again in a sec.", time: formatTime() });
+      }
+      console.error(err);
+    }
+  }
+
+  attachBtn.addEventListener("click", () => fileInput.click());
+
+  fileInput.addEventListener("change", () => {
+    Array.from(fileInput.files || []).forEach((file) => {
+      const isImage = file.type.startsWith("image/");
+      pendingFiles.push({
+        kind: isImage ? "image" : "file",
+        name: file.name,
+        size: file.size,
+        url: isImage ? URL.createObjectURL(file) : null,
+        file
+      });
+    });
+    fileInput.value = "";
+    renderPending();
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    const attachments = pendingFiles.splice(0, pendingFiles.length);
+    renderPending();
+    if ((!text && attachments.length === 0) || busy) return;
+
+    busy = true;
+    resizeInput();
+
+    const personId = state.activeId;
+    const prepared = await prepareAttachments(attachments);
+    const time = formatTime();
+    appendMessage({ side: "out", text, time, attachments });
+
+    let content = text;
+    if (prepared.notes.length) {
+      content = [text, ...prepared.notes].filter(Boolean).join("\n\n");
     }
 
-    attachBtn.addEventListener("click", () => fileInput.click());
-
-    fileInput.addEventListener("change", () => {
-      Array.from(fileInput.files || []).forEach((file) => {
-        const isImage = file.type.startsWith("image/");
-        pendingFiles.push({
-          kind: isImage ? "image" : "file",
-          name: file.name,
-          size: file.size,
-          url: isImage ? URL.createObjectURL(file) : null,
-          file
-        });
-      });
-      fileInput.value = "";
-      renderPending();
+    pushEntry(personId, {
+      role: "user",
+      content: content || (prepared.images.length ? "sent a photo" : ""),
+      images: prepared.images,
+      time,
+      attachments: attachments.map((a) => ({
+        kind: a.kind,
+        name: a.name,
+        size: a.size,
+        url: a.kind === "image" ? a.url : null
+      }))
     });
+    renderConvList();
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
-      const attachments = pendingFiles.splice(0, pendingFiles.length);
-      renderPending();
-      if ((!text && attachments.length === 0) || busy) return;
-
-      busy = true;
-      resizeInput();
-
-      const prepared = await prepareAttachments(attachments);
-      appendMessage({ side: "out", text, attachments });
-
-      let content = text;
-      if (prepared.notes.length) {
-        content = [text, ...prepared.notes].filter(Boolean).join("\n\n");
-      }
-
-      history.push({
-        role: "user",
-        content: content || (prepared.images.length ? "sent a photo" : ""),
-        images: prepared.images
-      });
-
-      input.value = "";
-      resizeInput();
-      await askModel();
-      busy = false;
-      resizeInput();
-      input.focus();
-    });
-
-    input.addEventListener("input", resizeInput);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        form.requestSubmit();
-      }
-    });
-
-    // Seed opening messages in Slack layout
-    appendMessage({ side: "in", text: "Hey — you free for a sec?" });
-    appendMessage({ side: "in", text: "Need a quick take on something." });
-
-    applyContact();
-    applyTheme();
+    input.value = "";
     resizeInput();
-  </script>
+    await askModel(personId);
+    busy = false;
+    resizeInput();
+    input.focus();
+  });
+
+  input.addEventListener("input", resizeInput);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  });
+
+  searchInput.addEventListener("input", renderConvList);
+
+  document.querySelectorAll(".filter-pills .pill").forEach((pill) => {
+    pill.addEventListener("click", () => {
+      document.querySelectorAll(".filter-pills .pill").forEach((p) => p.classList.remove("active"));
+      pill.classList.add("active");
+    });
+  });
+
+  document.querySelectorAll(".rail-btn").forEach((btn, i) => {
+    if (i === 0) return;
+    btn.addEventListener("click", (e) => e.preventDefault());
+  });
+
+  function setAppearanceButtons(appearance) {
+    draftAppearance = ["light", "dark", "auto"].includes(appearance) ? appearance : "auto";
+    document.getElementById("appearanceLight").classList.toggle("active", draftAppearance === "light");
+    document.getElementById("appearanceDark").classList.toggle("active", draftAppearance === "dark");
+    document.getElementById("appearanceAuto").classList.toggle("active", draftAppearance === "auto");
+    document.getElementById("appearanceHint").textContent = APPEARANCE_HINTS[draftAppearance];
+  }
+
+  document.getElementById("appearanceLight").addEventListener("click", () => setAppearanceButtons("light"));
+  document.getElementById("appearanceDark").addEventListener("click", () => setAppearanceButtons("dark"));
+  document.getElementById("appearanceAuto").addEventListener("click", () => setAppearanceButtons("auto"));
+
+  function openPersonModal(mode, personId) {
+    modalMode = mode;
+    editingPersonId = personId || null;
+    const person = personId ? state.people.find((p) => p.id === personId) : null;
+
+    personModalTitle.textContent = mode === "add" ? "Add person" : "Edit profile";
+    nameInput.value = person ? person.name : "";
+    draftAvatar = person ? person.avatarDataUrl : null;
+    draftAccent = person ? person.accent : ACCENTS[state.people.length % ACCENTS.length];
+
+    modalAvatar.className = "modal-avatar-preview " + (draftAvatar ? "" : accentClass(draftAccent));
+    paintAvatar(modalAvatar, nameInput.value || "?", draftAvatar);
+
+    appearanceSection.hidden = mode !== "edit";
+    deleteBtn.hidden = !(mode === "edit" && state.people.length > 1);
+    if (mode === "edit") setAppearanceButtons(state.appearance);
+
+    personModal.classList.add("open");
+    nameInput.focus();
+    nameInput.select();
+  }
+
+  function closePersonModal() {
+    personModal.classList.remove("open");
+  }
+
+  document.getElementById("openContact").addEventListener("click", () => openPersonModal("edit", state.activeId));
+  document.getElementById("openContact").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openPersonModal("edit", state.activeId);
+    }
+  });
+  document.getElementById("detailsBtn").addEventListener("click", () => openPersonModal("edit", state.activeId));
+  document.getElementById("addDmBtn").addEventListener("click", () => openPersonModal("add", null));
+  document.getElementById("addChatBtn").addEventListener("click", () => openPersonModal("add", null));
+
+  document.getElementById("cancelContactBtn").addEventListener("click", closePersonModal);
+  personModal.addEventListener("click", (e) => {
+    if (e.target === personModal) closePersonModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && personModal.classList.contains("open")) closePersonModal();
+  });
+
+  document.getElementById("changePhotoBtn").addEventListener("click", () => avatarInput.click());
+  document.getElementById("clearPhotoBtn").addEventListener("click", () => {
+    draftAvatar = null;
+    modalAvatar.className = "modal-avatar-preview " + accentClass(draftAccent);
+    paintAvatar(modalAvatar, nameInput.value || "?", null);
+  });
+
+  nameInput.addEventListener("input", () => {
+    if (!draftAvatar) paintAvatar(modalAvatar, nameInput.value || "?", null);
+  });
+
+  avatarInput.addEventListener("change", () => {
+    const file = avatarInput.files && avatarInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      draftAvatar = reader.result;
+      modalAvatar.classList.remove(...ACCENTS);
+      paintAvatar(modalAvatar, nameInput.value || "?", draftAvatar);
+    };
+    reader.readAsDataURL(file);
+    avatarInput.value = "";
+  });
+
+  document.getElementById("saveContactBtn").addEventListener("click", () => {
+    const name = nameInput.value.trim();
+
+    if (modalMode === "add") {
+      const id = uid();
+      state.people.push({
+        id,
+        name: name || `Person ${state.people.length + 1}`,
+        avatarDataUrl: draftAvatar,
+        accent: draftAccent
+      });
+      state.threads[id] = [];
+      state.activeId = id;
+      saveState();
+      renderConvList();
+      renderActiveHeader();
+      renderThreadFor(id);
+    } else {
+      const person = state.people.find((p) => p.id === editingPersonId);
+      if (person) {
+        person.name = name || person.name;
+        person.avatarDataUrl = draftAvatar;
+      }
+      state.appearance = draftAppearance;
+      saveState();
+      applyTheme();
+      renderConvList();
+      renderActiveHeader();
+    }
+    closePersonModal();
+  });
+
+  deleteBtn.addEventListener("click", () => {
+    if (state.people.length <= 1 || !editingPersonId) return;
+    const idx = state.people.findIndex((p) => p.id === editingPersonId);
+    if (idx === -1) return;
+    state.people.splice(idx, 1);
+    delete state.threads[editingPersonId];
+    if (state.activeId === editingPersonId) {
+      state.activeId = state.people[0].id;
+    }
+    saveState();
+    renderConvList();
+    renderActiveHeader();
+    renderThreadFor(state.activeId);
+    closePersonModal();
+  });
+
+  renderConvList();
+  renderActiveHeader();
+  renderThreadFor(state.activeId);
+  applyTheme();
+  resizeInput();
+</script>
 </body>
 </html>
